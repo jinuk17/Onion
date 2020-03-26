@@ -9,6 +9,8 @@ version = "1.0-SNAPSHOT"
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation("io.github.microutils:kotlin-logging:1.7.9")
+    implementation("org.slf4j:slf4j-simple:1.7.29")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
 }
 repositories {

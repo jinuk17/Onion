@@ -45,7 +45,7 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
                                 when(method){
                                     HttpRequestMethod.GET -> {
-                                        if(url.toLowerCase().endsWith(".html")) {
+                                        if(url.toLowerCase().endsWith(".html") || url.toLowerCase().endsWith(".css")) {
                                             body = handleIndexHtml(requestHeader)
                                         }else if(url.toLowerCase().startsWith("/user/create")) {
                                             val user = handleUserCreate(UrlParser.parse(url).queryParam)
@@ -62,7 +62,7 @@ class RequestHandler(private val connection: Socket) : Thread() {
                                         }
 
                                         if(body != null) {
-                                            response200Header(dos, body.size)
+                                            response200Header(dos, body.size, parseAcceptType(requestHeader))
                                             responseBody(dos, body)
                                         }else if(redirectLocation != null) {
                                             response302Header(dos, redirectLocation)
@@ -111,6 +111,12 @@ class RequestHandler(private val connection: Socket) : Thread() {
         }?.get("logined")?.toBoolean() ?: false
     }
 
+    private fun parseAcceptType(requestHeader: RequestHeader): String {
+        val accepts = requestHeader.metadata["Accept"]?.split(",").orEmpty()
+        return if(accepts.contains("text/css")) "text/css" else "text/html"
+    }
+
+
     private fun responseBody(dos: DataOutputStream, body: ByteArray) {
         try {
             dos.write(body, 0, body.size)
@@ -120,10 +126,10 @@ class RequestHandler(private val connection: Socket) : Thread() {
         }
     }
 
-    private fun response200Header(dos: DataOutputStream, lengthOfBodyContent: Int) {
+    private fun response200Header(dos: DataOutputStream, lengthOfBodyContent: Int, contentType: String) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n")
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n")
+            dos.writeBytes("Content-Type: $contentType;charset=utf-8\r\n")
             dos.writeBytes("Content-Length: $lengthOfBodyContent\r\n")
             dos.writeBytes("\r\n")
         } catch (e: IOException) {
@@ -217,5 +223,4 @@ class RequestHandler(private val connection: Socket) : Thread() {
         br.read(body, 0, contentLength)
         return String(body)
     }
-
 }

@@ -1,7 +1,11 @@
 package webserver.mode
 
+typealias UserId = String
+
 data class User(
-    val userId: String,
+
+
+    val id: UserId,
     val password: String,
     val name: String,
     val email: String

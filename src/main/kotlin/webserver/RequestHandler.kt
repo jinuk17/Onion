@@ -2,6 +2,7 @@ package webserver
 
 import mu.KotlinLogging
 import webserver.mode.User
+import webserver.repository.UserRepository
 import webserver.util.HttpRequestParserUtil
 import webserver.util.UrlParser
 import java.io.*
@@ -36,7 +37,14 @@ class RequestHandler(private val connection: Socket) : Thread() {
                                         if(url.toLowerCase() == "/index.html") {
                                             body = handleIndexHtml(requestHeader)
                                         }else if(url.toLowerCase().startsWith("/user/create")) {
-                                            body = handleUserCreate(UrlParser.parse(url).queryParam)
+                                            val user = handleUserCreate(UrlParser.parse(url).queryParam)
+
+                                            body = user?.toString()?.toByteArray()
+                                        }
+
+                                        if(body != null) {
+                                            response200Header(dos, body.size)
+                                            responseBody(dos, body)
                                         }
                                     }
                                     HttpRequestMethod.POST -> {
@@ -46,13 +54,12 @@ class RequestHandler(private val connection: Socket) : Thread() {
                                         }.orEmpty()
 
                                         if(url.toLowerCase().startsWith("/user/create")) {
-                                            body = handleUserCreate(parameterName)
+                                            val user = handleUserCreate(parameterName)
+                                            if(user != null) {
+                                                response302Header(dos, "/index.html")
+                                            }
                                         }
                                     }
-                                }
-                                if(body != null) {
-                                    response200Header(dos, body.size)
-                                    responseBody(dos, body)
                                 }
                             }
                         }
@@ -80,6 +87,16 @@ class RequestHandler(private val connection: Socket) : Thread() {
             dos.writeBytes("HTTP/1.1 200 OK \r\n")
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n")
             dos.writeBytes("Content-Length: $lengthOfBodyContent\r\n")
+            dos.writeBytes("\r\n")
+        } catch (e: IOException) {
+            logger.error(e) { e }
+        }
+    }
+
+    private fun response302Header(dos: DataOutputStream, location: String) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 OK \r\n")
+            dos.writeBytes("Location: $location\r\n")
             dos.writeBytes("\r\n")
         } catch (e: IOException) {
             logger.error(e) { e }
@@ -130,7 +147,7 @@ class RequestHandler(private val connection: Socket) : Thread() {
         return Files.readAllBytes(File("./webapp${requestHeader.url}").toPath())
     }
 
-    private fun handleUserCreate(queryParam: Map<String, String>): ByteArray? {
+    private fun handleUserCreate(queryParam: Map<String, String>): User? {
 
         val user =
             queryParam["userId"]?.let { userId ->
@@ -142,9 +159,10 @@ class RequestHandler(private val connection: Socket) : Thread() {
                 }
             }
         }
-        logger.info { user }
-        return user?.toString()?.toByteArray()
 
+        logger.info { user }
+
+        return user?.let { UserRepository.save(it) }
     }
 
     private fun readBody(br: BufferedReader, contentLength: Int): String {

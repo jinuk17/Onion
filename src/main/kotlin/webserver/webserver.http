@@ -16,6 +16,7 @@ Content-Type: application/x-www-form-urlencoded
 #userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net
 userId=admin&password=admin&name=Admin&email=admin%40google.com
 
+
 ###
 
 POST localhost:8080/user/login
@@ -24,3 +25,4 @@ Content-Type: application/x-www-form-urlencoded
 userId=javajigi&password=password
 
 ###
+

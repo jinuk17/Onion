@@ -41,6 +41,7 @@ class RequestHandler(private val connection: Socket) : Thread() {
                             requestHeader.apply {
 
                                 var body: ByteArray? = null
+                                var redirectLocation: String? = null
 
                                 when(method){
                                     HttpRequestMethod.GET -> {
@@ -48,13 +49,23 @@ class RequestHandler(private val connection: Socket) : Thread() {
                                             body = handleIndexHtml(requestHeader)
                                         }else if(url.toLowerCase().startsWith("/user/create")) {
                                             val user = handleUserCreate(UrlParser.parse(url).queryParam)
-
                                             body = user?.toString()?.toByteArray()
+                                        }else if(url.toLowerCase().startsWith("/user/list")) {
+                                            if(checkAuthorized(requestHeader)) {
+                                                val users =
+                                                    UserRepository.getAll().joinToString("<br/>") { "<h3>$it</h3>" }
+                                                logger.info {users}
+                                                body = users.toByteArray()
+                                            }else{
+                                                redirectLocation = "/user/login.html"
+                                            }
                                         }
 
                                         if(body != null) {
                                             response200Header(dos, body.size)
                                             responseBody(dos, body)
+                                        }else if(redirectLocation != null) {
+                                            response302Header(dos, redirectLocation)
                                         }
                                     }
                                     HttpRequestMethod.POST -> {
@@ -92,6 +103,12 @@ class RequestHandler(private val connection: Socket) : Thread() {
             logger.error(e) { e }
         }
 
+    }
+
+    private fun checkAuthorized(requestHeader: RequestHeader): Boolean {
+        return requestHeader.metadata["Cookie"]?.let {
+            HttpRequestParserUtil.parseQueryParameters(it, ";", "=")
+        }?.get("logined")?.toBoolean() ?: false
     }
 
     private fun responseBody(dos: DataOutputStream, body: ByteArray) {

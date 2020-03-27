@@ -2,8 +2,6 @@ package webserver
 
 import mu.KotlinLogging
 import java.net.ServerSocket
-import java.net.Socket
-import kotlin.contracts.contract
 
 object WebServer {
 

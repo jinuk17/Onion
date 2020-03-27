@@ -2,6 +2,7 @@ package webserver
 
 import mu.KotlinLogging
 import webserver.mode.User
+import webserver.util.HttpRequestParserUtil
 import webserver.util.UrlParser
 import java.io.*
 import java.net.Socket
@@ -23,21 +24,39 @@ class RequestHandler(private val connection: Socket) : Thread() {
                         val requestHeader = requestHeader(br) ?: return
 
                         connection.getOutputStream().use { output ->
+
                             val dos = DataOutputStream(output)
-                            var body: ByteArray? = null
 
-                            if(requestHeader.url.toLowerCase() == "/index.html") {
-                                body = handleIndexHtml(requestHeader)
-                            }else if(requestHeader.url.toLowerCase().startsWith("/user/create")) {
-                                body = handleUserCreate(requestHeader)
+                            requestHeader.apply {
+
+                                var body: ByteArray? = null
+
+                                when(method){
+                                    HttpRequestMethod.GET -> {
+                                        if(url.toLowerCase() == "/index.html") {
+                                            body = handleIndexHtml(requestHeader)
+                                        }else if(url.toLowerCase().startsWith("/user/create")) {
+                                            body = handleUserCreate(UrlParser.parse(url).queryParam)
+                                        }
+                                    }
+                                    HttpRequestMethod.POST -> {
+                                        val parameterName = metadata["Content-Length"]?.let {
+                                            HttpRequestParserUtil.parseQueryParameters(
+                                            readBody(br, it.toInt()), "&", "=")
+                                        }.orEmpty()
+
+                                        if(url.toLowerCase().startsWith("/user/create")) {
+                                            body = handleUserCreate(parameterName)
+                                        }
+                                    }
+                                }
+                                if(body != null) {
+                                    response200Header(dos, body.size)
+                                    responseBody(dos, body)
+                                }
                             }
-
-                            if(body != null) {
-                                response200Header(dos, body.size)
-                                responseBody(dos, body)
-                            }
-
                         }
+
                     }
                 }
             }
@@ -90,29 +109,35 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
         val line1 = header[0].split(" ")
 
-        val method = line1[0]
+        val method = HttpRequestMethod.valueOf(line1[0])
         val path = line1[1]
 
-        return RequestHeader(method, path)
+
+        val metadata = header.subList(1, header.size).mapNotNull {
+            HttpRequestParserUtil.getKeyValue(it, ":")
+        }.toMap()
+
+        return RequestHeader(method, path, metadata)
     }
 
-    data class RequestHeader(val method: String, val url: String)
+    data class RequestHeader(val method: HttpRequestMethod, val url: String, val metadata: Map<String, String>)
 
+    enum class HttpRequestMethod {
+        GET, POST
+    }
 
-    fun handleIndexHtml(requestHeader: RequestHeader): ByteArray {
+    private fun handleIndexHtml(requestHeader: RequestHeader): ByteArray {
         return Files.readAllBytes(File("./webapp${requestHeader.url}").toPath())
     }
 
-    fun handleUserCreate(requestHeader: RequestHeader): ByteArray? {
+    private fun handleUserCreate(queryParam: Map<String, String>): ByteArray? {
 
-        val url = UrlParser.parse(requestHeader.url)
-        val user = url.run {
+        val user =
             queryParam["userId"]?.let { userId ->
-                queryParam["password"]?.let { password ->
-                    queryParam["name"]?.let { name ->
-                        queryParam["email"]?.let { email ->
-                            User(userId, password, name, email)
-                        }
+            queryParam["password"]?.let { password ->
+                queryParam["name"]?.let { name ->
+                    queryParam["email"]?.let { email ->
+                        User(userId, password, name, email)
                     }
                 }
             }
@@ -120,6 +145,12 @@ class RequestHandler(private val connection: Socket) : Thread() {
         logger.info { user }
         return user?.toString()?.toByteArray()
 
+    }
+
+    private fun readBody(br: BufferedReader, contentLength: Int): String {
+        val body = CharArray(contentLength)
+        br.read(body, 0, contentLength)
+        return String(body)
     }
 
 }

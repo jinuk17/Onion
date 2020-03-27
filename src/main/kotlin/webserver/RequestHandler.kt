@@ -1,6 +1,7 @@
 package webserver
 
 import mu.KotlinLogging
+import webserver.mode.Login
 import webserver.mode.User
 import webserver.repository.UserRepository
 import webserver.util.HttpRequestParserUtil
@@ -24,6 +25,15 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
                         val requestHeader = requestHeader(br) ?: return
 
+                        val requestBody = requestHeader.metadata["Content-Length"]?.let {
+                            readBody(br, it.toInt())
+                        }.orEmpty()
+
+                        logger.info { "============================================================ "}
+                        logger.info { "head :  : $requestHeader "}
+                        logger.info { "body :  : $requestBody "}
+                        logger.info { "============================================================ "}
+
                         connection.getOutputStream().use { output ->
 
                             val dos = DataOutputStream(output)
@@ -34,7 +44,7 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
                                 when(method){
                                     HttpRequestMethod.GET -> {
-                                        if(url.toLowerCase() == "/index.html") {
+                                        if(url.toLowerCase().endsWith(".html")) {
                                             body = handleIndexHtml(requestHeader)
                                         }else if(url.toLowerCase().startsWith("/user/create")) {
                                             val user = handleUserCreate(UrlParser.parse(url).queryParam)
@@ -48,15 +58,26 @@ class RequestHandler(private val connection: Socket) : Thread() {
                                         }
                                     }
                                     HttpRequestMethod.POST -> {
-                                        val parameterName = metadata["Content-Length"]?.let {
-                                            HttpRequestParserUtil.parseQueryParameters(
-                                            readBody(br, it.toInt()), "&", "=")
+
+                                        val parameterMap = requestBody.let {
+                                            HttpRequestParserUtil.parseQueryParameters(it,"&", "=")
                                         }.orEmpty()
 
                                         if(url.toLowerCase().startsWith("/user/create")) {
-                                            val user = handleUserCreate(parameterName)
+                                            val user = handleUserCreate(parameterMap)
                                             if(user != null) {
                                                 response302Header(dos, "/index.html")
+                                            }
+                                        }else if(url.toLowerCase().startsWith("/user/login")) {
+                                            val login = parseLogin(parameterMap)
+                                            val loginUser = login?.let { l ->
+                                                UserRepository.get(l.userId)?.takeIf { it.password == l.password }
+                                            }
+
+                                            if(loginUser != null) {
+                                                response302Header(dos, "/index.html", "logined=true")
+                                            }else{
+                                                response302Header(dos, "/user/login_failed.html", "logined=false")
                                             }
                                         }
                                     }
@@ -93,10 +114,11 @@ class RequestHandler(private val connection: Socket) : Thread() {
         }
     }
 
-    private fun response302Header(dos: DataOutputStream, location: String) {
+    private fun response302Header(dos: DataOutputStream, location: String, cookie: String? = null) {
         try {
             dos.writeBytes("HTTP/1.1 302 OK \r\n")
             dos.writeBytes("Location: $location\r\n")
+            cookie?.let{ dos.writeBytes("Set-Cookie: $it\r\n") }
             dos.writeBytes("\r\n")
         } catch (e: IOException) {
             logger.error(e) { e }
@@ -163,6 +185,14 @@ class RequestHandler(private val connection: Socket) : Thread() {
         logger.info { user }
 
         return user?.let { UserRepository.save(it) }
+    }
+
+    private fun parseLogin(queryParam: Map<String, String>): Login? {
+        return queryParam["userId"]?.let { userId ->
+            queryParam["password"]?.let { password ->
+                Login(userId, password)
+            }
+        }
     }
 
     private fun readBody(br: BufferedReader, contentLength: Int): String {

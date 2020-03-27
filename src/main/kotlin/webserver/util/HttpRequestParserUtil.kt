@@ -1,11 +1,8 @@
 package webserver.util
 
-import sun.security.util.Length
-import java.io.BufferedReader
-
 object HttpRequestParserUtil {
 
-    fun parseQueryParameters(text: String?, parameterDelimiter: String, keyValueDelimiter: String):Map<String, String> {
+    fun parseQueryParameters(text: String?, parameterDelimiter: String, keyValueDelimiter: String):Map<String, String>? {
 
         if (text.isNullOrBlank()) {
             return mapOf()

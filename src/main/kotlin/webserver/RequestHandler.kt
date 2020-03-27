@@ -1,6 +1,8 @@
 package webserver
 
 import mu.KotlinLogging
+import webserver.mode.User
+import webserver.util.UrlParser
 import java.io.*
 import java.net.Socket
 import java.nio.file.Files
@@ -22,9 +24,19 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
                         connection.getOutputStream().use { output ->
                             val dos = DataOutputStream(output)
-                            val body = Files.readAllBytes(File("./webapp${requestHeader.url}").toPath())
-                            response200Header(dos, body.size)
-                            responseBody(dos, body)
+                            var body: ByteArray? = null
+
+                            if(requestHeader.url.toLowerCase() == "/index.html") {
+                                body = handleIndexHtml(requestHeader)
+                            }else if(requestHeader.url.toLowerCase().startsWith("/user/create")) {
+                                body = handleUserCreate(requestHeader)
+                            }
+
+                            if(body != null) {
+                                response200Header(dos, body.size)
+                                responseBody(dos, body)
+                            }
+
                         }
                     }
                 }
@@ -54,7 +66,6 @@ class RequestHandler(private val connection: Socket) : Thread() {
             logger.error(e) { e }
         }
     }
-
 
     /*
     * GET /index.html HTTP/1.1
@@ -86,4 +97,29 @@ class RequestHandler(private val connection: Socket) : Thread() {
     }
 
     data class RequestHeader(val method: String, val url: String)
+
+
+    fun handleIndexHtml(requestHeader: RequestHeader): ByteArray {
+        return Files.readAllBytes(File("./webapp${requestHeader.url}").toPath())
+    }
+
+    fun handleUserCreate(requestHeader: RequestHeader): ByteArray? {
+
+        val url = UrlParser.parse(requestHeader.url)
+        val user = url.run {
+            queryParam["userId"]?.let { userId ->
+                queryParam["password"]?.let { password ->
+                    queryParam["name"]?.let { name ->
+                        queryParam["email"]?.let { email ->
+                            User(userId, password, name, email)
+                        }
+                    }
+                }
+            }
+        }
+        logger.info { user }
+        return user?.toString()?.toByteArray()
+
+    }
+
 }

@@ -5,3 +5,7 @@ GET localhost:8080
 GET localhost:8080/index.html
 
 ###
+
+GET localhost:8080//user/create?userId=javajigi&password=password&name=JaeSung&email=javajigi%40slipp.net
+
+###

@@ -1,11 +1,10 @@
 package webserver
 
 import mu.KotlinLogging
-import webserver.mode.Login
-import webserver.mode.User
+import webserver.model.Login
+import webserver.model.User
 import webserver.repository.UserRepository
 import webserver.util.HttpRequestParserUtil
-import webserver.util.UrlParser
 import java.io.*
 import java.net.Socket
 import java.nio.file.Files
@@ -20,84 +19,68 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
         try{
             connection.getInputStream().use { input ->
-                InputStreamReader(input, "UTF-8").use { isr ->
-                    BufferedReader(isr).use { br ->
 
-                        val requestHeader = requestHeader(br) ?: return
+                val httpRequest = HttpRequest(input)
 
-                        val requestBody = requestHeader.metadata["Content-Length"]?.let {
-                            readBody(br, it.toInt())
-                        }.orEmpty()
+                logger.info {  httpRequest }
 
-                        logger.info { "============================================================ "}
-                        logger.info { "head :  : $requestHeader "}
-                        logger.info { "body :  : $requestBody "}
-                        logger.info { "============================================================ "}
+                connection.getOutputStream().use { output ->
 
-                        connection.getOutputStream().use { output ->
+                    val dos = DataOutputStream(output)
 
-                            val dos = DataOutputStream(output)
+                    var body: ByteArray? = null
+                    var redirectLocation: String? = null
 
-                            requestHeader.apply {
+                    val method = httpRequest.getMethod()
+                    val path = httpRequest.getPath()
 
-                                var body: ByteArray? = null
-                                var redirectLocation: String? = null
+                    when(method){
+                        "GET" -> {
+                            if(path.toLowerCase().endsWith(".html") || path.toLowerCase().endsWith(".css")) {
+                                body = handleIndexHtml(path)
+                            }else if(path.toLowerCase().startsWith("/user/create")) {
+                                val user = handleUserCreate(httpRequest)
+                                body = user?.toString()?.toByteArray()
+                            }else if(path.toLowerCase().startsWith("/user/list")) {
+                                if(checkAuthorized(httpRequest.getHeader("Cookie"))) {
+                                    val users =
+                                        UserRepository.getAll().joinToString("<br/>") { "<h3>$it</h3>" }
+                                    logger.info {users}
+                                    body = users.toByteArray()
+                                }else{
+                                    redirectLocation = "/user/login.html"
+                                }
+                            }
 
-                                when(method){
-                                    HttpRequestMethod.GET -> {
-                                        if(url.toLowerCase().endsWith(".html") || url.toLowerCase().endsWith(".css")) {
-                                            body = handleIndexHtml(requestHeader)
-                                        }else if(url.toLowerCase().startsWith("/user/create")) {
-                                            val user = handleUserCreate(UrlParser.parse(url).queryParam)
-                                            body = user?.toString()?.toByteArray()
-                                        }else if(url.toLowerCase().startsWith("/user/list")) {
-                                            if(checkAuthorized(requestHeader)) {
-                                                val users =
-                                                    UserRepository.getAll().joinToString("<br/>") { "<h3>$it</h3>" }
-                                                logger.info {users}
-                                                body = users.toByteArray()
-                                            }else{
-                                                redirectLocation = "/user/login.html"
-                                            }
-                                        }
+                            if(body != null) {
+                                response200Header(dos, body.size, parseAcceptType(httpRequest.getHeader("Accept")))
+                                responseBody(dos, body)
+                            }else if(redirectLocation != null) {
+                                response302Header(dos, redirectLocation)
+                            }
+                        }
+                        "POST" -> {
+                            if(path.toLowerCase().startsWith("/user/create")) {
+                                val user = handleUserCreate(httpRequest)
+                                if(user != null) {
+                                    response302Header(dos, "/index.html")
+                                }
+                            }else if(path.toLowerCase().startsWith("/user/login")) {
+                                val login = parseLogin(httpRequest)
+                                val loginUser = login?.let { l ->
+                                    UserRepository.get(l.userId)?.takeIf { it.password == l.password }
+                                }
 
-                                        if(body != null) {
-                                            response200Header(dos, body.size, parseAcceptType(requestHeader))
-                                            responseBody(dos, body)
-                                        }else if(redirectLocation != null) {
-                                            response302Header(dos, redirectLocation)
-                                        }
-                                    }
-                                    HttpRequestMethod.POST -> {
-
-                                        val parameterMap = requestBody.let {
-                                            HttpRequestParserUtil.parseQueryParameters(it,"&", "=")
-                                        }.orEmpty()
-
-                                        if(url.toLowerCase().startsWith("/user/create")) {
-                                            val user = handleUserCreate(parameterMap)
-                                            if(user != null) {
-                                                response302Header(dos, "/index.html")
-                                            }
-                                        }else if(url.toLowerCase().startsWith("/user/login")) {
-                                            val login = parseLogin(parameterMap)
-                                            val loginUser = login?.let { l ->
-                                                UserRepository.get(l.userId)?.takeIf { it.password == l.password }
-                                            }
-
-                                            if(loginUser != null) {
-                                                response302Header(dos, "/index.html", "logined=true")
-                                            }else{
-                                                response302Header(dos, "/user/login_failed.html", "logined=false")
-                                            }
-                                        }
-                                    }
+                                if(loginUser != null) {
+                                    response302Header(dos, "/index.html", "logined=true")
+                                }else{
+                                    response302Header(dos, "/user/login_failed.html", "logined=false")
                                 }
                             }
                         }
-
                     }
                 }
+
             }
         }catch (e: IOException) {
             logger.error(e) { e }
@@ -105,14 +88,14 @@ class RequestHandler(private val connection: Socket) : Thread() {
 
     }
 
-    private fun checkAuthorized(requestHeader: RequestHeader): Boolean {
-        return requestHeader.metadata["Cookie"]?.let {
+    private fun checkAuthorized(cookie: String?): Boolean {
+        return cookie?.let {
             HttpRequestParserUtil.parseQueryParameters(it, ";", "=")
         }?.get("logined")?.toBoolean() ?: false
     }
 
-    private fun parseAcceptType(requestHeader: RequestHeader): String {
-        val accepts = requestHeader.metadata["Accept"]?.split(",").orEmpty()
+    private fun parseAcceptType(acceptType: String?): String {
+        val accepts = acceptType?.split(",").orEmpty()
         return if(accepts.contains("text/css")) "text/css" else "text/html"
     }
 
@@ -188,31 +171,31 @@ class RequestHandler(private val connection: Socket) : Thread() {
         GET, POST
     }
 
-    private fun handleIndexHtml(requestHeader: RequestHeader): ByteArray {
-        return Files.readAllBytes(File("./webapp${requestHeader.url}").toPath())
+    private fun handleIndexHtml(path: String): ByteArray {
+        return Files.readAllBytes(File("./webapp$path").toPath())
     }
 
-    private fun handleUserCreate(queryParam: Map<String, String>): User? {
+    private fun handleUserCreate(request: HttpRequest): User? {
 
         val user =
-            queryParam["userId"]?.let { userId ->
-            queryParam["password"]?.let { password ->
-                queryParam["name"]?.let { name ->
-                    queryParam["email"]?.let { email ->
-                        User(userId, password, name, email)
+            request.getParameter("userId")?.let { userId ->
+                request.getParameter("password")?.let { password ->
+                    request.getParameter("name")?.let { name ->
+                        request.getParameter("email")?.let { email ->
+                            User(userId, password, name, email)
+                        }
                     }
                 }
             }
-        }
 
         logger.info { user }
 
         return user?.let { UserRepository.save(it) }
     }
 
-    private fun parseLogin(queryParam: Map<String, String>): Login? {
-        return queryParam["userId"]?.let { userId ->
-            queryParam["password"]?.let { password ->
+    private fun parseLogin(request: HttpRequest): Login? {
+        return request.getParameter("userId")?.let { userId ->
+            request.getParameter("password")?.let { password ->
                 Login(userId, password)
             }
         }

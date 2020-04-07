@@ -1,4 +1,4 @@
-package webserver.mode
+package webserver.model
 
 typealias UserId = String
 

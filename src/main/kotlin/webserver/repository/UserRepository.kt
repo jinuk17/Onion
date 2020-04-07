@@ -1,7 +1,7 @@
 package webserver.repository
 
-import webserver.mode.User
-import webserver.mode.UserId
+import webserver.model.User
+import webserver.model.UserId
 
 object UserRepository {
 

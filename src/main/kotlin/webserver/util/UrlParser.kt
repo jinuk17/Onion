@@ -4,6 +4,11 @@ object UrlParser {
 
     fun parse(test: String): Url {
         val index = test.indexOf("?")
+
+        if(index == -1) {
+            return Url(test)
+        }
+
         val path = test.substring(0, index)
         val params = test.substring(index+1)
         val queryParam = HttpRequestParserUtil.parseQueryParameters(params, "&", "=").orEmpty()
@@ -12,4 +17,4 @@ object UrlParser {
 
 }
 
-data class Url(val path: String, val queryParam: Map<String, String>)
+data class Url(val path: String, val queryParam: Map<String, String> = emptyMap())

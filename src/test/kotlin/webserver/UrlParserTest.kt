@@ -2,7 +2,7 @@ package webserver
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import webserver.util.UrlParser
+import webserver.framework.util.UrlParser
 
 
 class UrlParserTest {

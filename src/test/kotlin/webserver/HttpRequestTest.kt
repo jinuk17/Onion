@@ -2,6 +2,7 @@ package webserver
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import webserver.framework.http.HttpRequest
 
 class HttpRequestTest {
 

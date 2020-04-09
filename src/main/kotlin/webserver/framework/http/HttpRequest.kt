@@ -1,26 +1,21 @@
-package webserver
+package webserver.framework.http
 
-import mu.KotlinLogging
-import webserver.util.HttpRequestParserUtil
-import webserver.util.UrlParser
+import webserver.framework.util.HttpRequestParserUtil
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 
 class HttpRequest(inputStream: InputStream) {
 
-    private val logger = KotlinLogging.logger {}
-
-    private val method: String
-    private val path: String
+    private val requestLine: RequestLine
     private val header: Map<String, String>
     private val parameter: Map<String, String>
 
     init {
         val br = BufferedReader(InputStreamReader(inputStream, "UTF-8"))
         val pathLine = br.readLine() ?: throw IllegalArgumentException()
-        val (m, p) = processRequestLine(pathLine)
-        val url = UrlParser.parse(p)
+
+        requestLine = RequestLine.of(pathLine)
 
         val headerLines = mutableListOf<String>()
         while (true) {
@@ -33,23 +28,16 @@ class HttpRequest(inputStream: InputStream) {
         }.toMap()
 
         val tempParam = mutableMapOf<String, String>()
-        tempParam.putAll(url.queryParam)
+        tempParam.putAll(requestLine.params)
 
-        if(m == "POST") {
-           val bodyParam = header["Content-Length"]?.let { readBody(br, it.toInt()) }?.let {
-               HttpRequestParserUtil.parseQueryParameters(it,"&", "=")
-           }.orEmpty()
-           tempParam.putAll(bodyParam)
+        if(requestLine.method == HttpMethod.POST) {
+            val bodyParam = header["Content-Length"]?.let { readBody(br, it.toInt()) }?.let {
+                HttpRequestParserUtil.parseQueryParameters(it,"&", "=")
+            }.orEmpty()
+            tempParam.putAll(bodyParam)
         }
 
-        method = m
-        path = url.path
         parameter = tempParam.toMap()
-    }
-
-    private fun processRequestLine(line: String): Pair<String, String> {
-        val requestLine = line.split(" ")
-        return Pair(requestLine[0], requestLine[1])
     }
 
     private fun readBody(br: BufferedReader, contentLength: Int): String {
@@ -58,12 +46,12 @@ class HttpRequest(inputStream: InputStream) {
         return String(body)
     }
 
-    fun getMethod(): String {
-        return method
+    fun getMethod(): HttpMethod {
+        return requestLine.method
     }
 
     fun getPath(): String {
-        return path
+        return requestLine.path
     }
 
     fun getHeader(name: String): String? {
@@ -74,10 +62,13 @@ class HttpRequest(inputStream: InputStream) {
         return parameter[name]
     }
 
-    override fun toString(): String {
-        return "HttpRequest(method='$method', path='$path', header=$header, parameter=$parameter)"
+    fun getParameter(): Map<String, String> {
+        return parameter
     }
 
+    override fun toString(): String {
+        return "HttpRequest(method='${requestLine.method}', path='${requestLine.path}', header=$header, parameter=$parameter)"
+    }
 }
 
 

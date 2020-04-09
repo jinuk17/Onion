@@ -1,4 +1,4 @@
-package webserver.util
+package webserver.framework.util
 
 object UrlParser {
 

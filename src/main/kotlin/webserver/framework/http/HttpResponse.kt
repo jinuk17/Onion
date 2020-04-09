@@ -1,4 +1,4 @@
-package webserver
+package webserver.framework.http
 
 import mu.KotlinLogging
 import java.io.DataOutputStream

@@ -1,4 +1,4 @@
-package webserver.util
+package webserver.framework.util
 
 object HttpRequestParserUtil {
 
@@ -9,7 +9,12 @@ object HttpRequestParserUtil {
         }
 
         val tokens: List<String> = text.split(parameterDelimiter)
-        return tokens.mapNotNull { getKeyValue(it, keyValueDelimiter) }.toMap()
+        return tokens.mapNotNull {
+            getKeyValue(
+                it,
+                keyValueDelimiter
+            )
+        }.toMap()
     }
 
     fun getKeyValue(text: String?, separator: String): Pair<String, String>? {

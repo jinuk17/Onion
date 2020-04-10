@@ -7,7 +7,8 @@ import org.apache.catalina.webresources.StandardRoot
 import java.io.File
 
 /*
-* output path /Users/jayden.uk/git/Onion/webapp/WEB-INF/classes
+* output path 추가
+* https://www.slipp.net/questions/302
 * */
 object WebServeLauncher {
 

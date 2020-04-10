@@ -1,36 +1,33 @@
-package servlet
+package servlet.controller
 
+import servlet.Controller
+import servlet.Controller.Companion.redirect
 import webserver.application.NotAuthenticationException
 import webserver.application.NotAuthorizedException
 import webserver.application.model.User
 import webserver.application.model.UserNotFoundException
 import webserver.application.repository.UserRepository
-import javax.servlet.annotation.WebServlet
-import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@WebServlet("/user/update")
-class UserUpdateFormServlet: HttpServlet() {
+class UserUpdateController: Controller {
 
-    override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
-
-        val user = getAuthorizedUser(req)
-        req.setAttribute("user", user)
-        req.getRequestDispatcher("/user/update.jsp").forward(req, resp)
+    override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
+        val user = getAuthorizedUser(request)
+        request.setAttribute("user", user)
+        return "/user/update.jsp"
     }
 
-    override fun doPost(req: HttpServletRequest, resp: HttpServletResponse) {
+    override fun post(request: HttpServletRequest, response: HttpServletResponse): String {
 
-        val user = getAuthorizedUser(req)
+        val user = getAuthorizedUser(request)
         val save = user.copy(
-            password = req.getParameter("password") ?: user.password,
-            name = req.getParameter("name") ?: user.name,
-            email = req.getParameter("email") ?: user.email
+            password = request.getParameter("password") ?: user.password,
+            name = request.getParameter("name") ?: user.name,
+            email = request.getParameter("email") ?: user.email
         )
         UserRepository.save(save)
-
-        resp.sendRedirect("/user/list")
+        return redirect("/user/list")
     }
 
     private fun getAuthorizedUser(req: HttpServletRequest): User {
@@ -40,5 +37,4 @@ class UserUpdateFormServlet: HttpServlet() {
         }
         return sessionUser
     }
-
 }

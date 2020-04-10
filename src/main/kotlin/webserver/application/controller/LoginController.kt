@@ -15,10 +15,10 @@ class LoginController: AbstractController() {
         val loginUser = UserRepository.get(login.userId)?.takeIf { it.password == login.password }
 
         if(loginUser != null) {
-            response.addHeader("Set-Cookie", "logined=true")
+            val session = request.getSession()
+            session.setAttribute("user", loginUser)
             response.redirect("/index.html")
         }else{
-            response.addHeader("Set-Cookie", "logined=false")
             response.redirect("/user/login_failed.html")
         }
     }

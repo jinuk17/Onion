@@ -11,7 +11,7 @@ object UrlParser {
 
         val path = test.substring(0, index)
         val params = test.substring(index+1)
-        val queryParam = HttpRequestParserUtil.parseQueryParameters(params, "&", "=").orEmpty()
+        val queryParam = HttpRequestParserUtils.parseQueryParameters(params, "&", "=").orEmpty()
         return Url(path, queryParam)
     }
 

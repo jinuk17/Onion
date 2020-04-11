@@ -26,3 +26,6 @@ userId=javajigi&password=password
 
 ###
 
+GET localhost:8080/hello
+
+###

@@ -1,6 +1,6 @@
 package webserver.framework.util
 
-object HttpRequestParserUtil {
+object HttpRequestParserUtils {
 
     fun parseQueryParameters(text: String?, parameterDelimiter: String, keyValueDelimiter: String):Map<String, String>? {
 

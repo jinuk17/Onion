@@ -1,9 +1,10 @@
 package webserver.framework.http
 
-import webserver.framework.util.HttpRequestParserUtil
+import webserver.framework.util.HttpRequestParserUtils
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.lang.IllegalStateException
 
 class HttpRequest(inputStream: InputStream) {
 
@@ -24,7 +25,7 @@ class HttpRequest(inputStream: InputStream) {
         }
 
         header = headerLines.mapNotNull {
-            HttpRequestParserUtil.getKeyValue(it, ":")
+            HttpRequestParserUtils.getKeyValue(it, ":")
         }.toMap()
 
         val tempParam = mutableMapOf<String, String>()
@@ -32,7 +33,7 @@ class HttpRequest(inputStream: InputStream) {
 
         if(requestLine.method == HttpMethod.POST) {
             val bodyParam = header["Content-Length"]?.let { readBody(br, it.toInt()) }?.let {
-                HttpRequestParserUtil.parseQueryParameters(it,"&", "=")
+                HttpRequestParserUtils.parseQueryParameters(it,"&", "=")
             }.orEmpty()
             tempParam.putAll(bodyParam)
         }
@@ -64,6 +65,15 @@ class HttpRequest(inputStream: InputStream) {
 
     fun getParameter(): Map<String, String> {
         return parameter
+    }
+
+    fun getCookies(): HttpCookie {
+        return HttpCookie(getHeader("Cookie").orEmpty())
+    }
+
+    fun getSession(): HttpSession {
+        val cookie = getCookies().getCookie("JSESSIONID") ?: throw IllegalStateException()
+        return HttpSessionRepository.getSession(cookie)
     }
 
     override fun toString(): String {

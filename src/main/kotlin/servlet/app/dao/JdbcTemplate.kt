@@ -1,14 +1,13 @@
 package servlet.app.dao
 
 import servlet.core.db.ConnectionManager
-import webserver.application.model.User
 import java.sql.PreparedStatement
 import java.sql.SQLException
 
-abstract class AbstractJdbcTemplate {
+class JdbcTemplate {
 
     @Throws(SQLException::class)
-    fun update(sql: String): Int? {
+    fun update(sql: String, setValues: (PreparedStatement) -> Unit): Int? {
         ConnectionManager.getConnection().use { conn ->
             conn.prepareStatement(sql).use {
                 setValues(it)
@@ -16,6 +15,4 @@ abstract class AbstractJdbcTemplate {
             }
         }
     }
-
-    abstract fun setValues(pstmt: PreparedStatement)
 }

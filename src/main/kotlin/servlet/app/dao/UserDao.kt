@@ -2,37 +2,32 @@ package servlet.app.dao
 
 import servlet.core.db.ConnectionManager
 import webserver.application.model.User
-import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
 
 class UserDao {
 
+    private val jdbcTemplate = JdbcTemplate()
+
     @Throws(SQLException::class)
     fun insert(user: User): Int? {
-        val jdbcTemplate = object : AbstractJdbcTemplate() {
-            override fun setValues(pstmt: PreparedStatement) {
-                pstmt.setString(1, user.id)
-                pstmt.setString(2, user.password)
-                pstmt.setString(3, user.name)
-                pstmt.setString(4, user.email)
-            }
+        return jdbcTemplate.update("INSERT INTO users VALUES (?, ?, ?, ?)") {
+            it.setString(1, user.id)
+            it.setString(2, user.password)
+            it.setString(3, user.name)
+            it.setString(4, user.email)
         }
-        return jdbcTemplate.update("INSERT INTO users VALUES (?, ?, ?, ?)")
     }
 
     @Throws(SQLException::class)
     fun update(user: User): Int? {
-        val jdbcTemplate = object : AbstractJdbcTemplate() {
-            override fun setValues(pstmt: PreparedStatement) {
-                pstmt.setString(1, user.password)
-                pstmt.setString(2, user.name)
-                pstmt.setString(3, user.email)
-                pstmt.setString(4, user.id)
-            }
+        return jdbcTemplate.update("UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?") {
+            it.setString(1, user.password)
+            it.setString(2, user.name)
+            it.setString(3, user.email)
+            it.setString(4, user.id)
         }
-        return jdbcTemplate.update("UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?")
     }
 
     @Throws(SQLException::class)

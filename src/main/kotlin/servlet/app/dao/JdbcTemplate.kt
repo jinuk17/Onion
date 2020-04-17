@@ -7,29 +7,38 @@ import java.sql.SQLException
 
 class JdbcTemplate {
 
-    @Throws(SQLException::class)
+    @Throws(DataAccessException::class)
     fun update(sql: String, setValues: (PreparedStatement) -> Unit): Int? {
-        ConnectionManager.getConnection().use { conn ->
-            conn.prepareStatement(sql).use {
-                setValues(it)
-                return it.executeUpdate()
-            }
-        }
-    }
-
-    @Throws(SQLException::class)
-    fun query(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> Any): List<Any> {
-        ConnectionManager.getConnection().use { conn ->
-            conn.prepareStatement(sql).use { pstmt ->
-                setValues(pstmt)
-                pstmt.executeQuery().use {
-                    return generateSequence { if(it.next()) mapRow(it) else null }.toList()
+        try {
+            ConnectionManager.getConnection().use { conn ->
+                conn.prepareStatement(sql).use {
+                    setValues(it)
+                    return it.executeUpdate()
                 }
             }
+        }catch (e: SQLException) {
+            throw DataAccessException(e)
+        }
+
+    }
+
+    @Throws(DataAccessException::class)
+    fun query(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> Any): List<Any> {
+        try{
+            ConnectionManager.getConnection().use { conn ->
+                conn.prepareStatement(sql).use { pstmt ->
+                    setValues(pstmt)
+                    pstmt.executeQuery().use {
+                        return generateSequence { if(it.next()) mapRow(it) else null }.toList()
+                    }
+                }
+            }
+        }catch (e: SQLException) {
+            throw DataAccessException(e)
         }
     }
 
-    @Throws(SQLException::class)
+    @Throws(DataAccessException::class)
     fun queryForObject(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> Any): Any? =
         query(sql, setValues, mapRow).firstOrNull()
 }

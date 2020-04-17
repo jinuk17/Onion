@@ -5,19 +5,19 @@ import webserver.application.model.User
 import java.sql.PreparedStatement
 import java.sql.SQLException
 
-abstract class UpdateJdbcTemplate {
+abstract class AbstractJdbcTemplate {
 
     @Throws(SQLException::class)
     fun update(user: User): Int? {
         ConnectionManager.getConnection().use { conn ->
-            val sql = createQueryForUpdate()
+            val sql = createQuery()
             conn.prepareStatement(sql).use {
-                setValuesForUpdate(it, user)
+                setValues(it, user)
                 return it.executeUpdate()
             }
         }
     }
 
-    abstract fun setValuesForUpdate(pstmt: PreparedStatement, user: User)
-    abstract fun createQueryForUpdate(): String
+    abstract fun setValues(pstmt: PreparedStatement, user: User)
+    abstract fun createQuery(): String
 }

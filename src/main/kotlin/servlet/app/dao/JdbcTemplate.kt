@@ -23,7 +23,7 @@ class JdbcTemplate {
     }
 
     @Throws(DataAccessException::class)
-    fun query(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> Any): List<Any> {
+    fun <T> query(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> T): List<T> {
         try{
             ConnectionManager.getConnection().use { conn ->
                 conn.prepareStatement(sql).use { pstmt ->
@@ -39,6 +39,6 @@ class JdbcTemplate {
     }
 
     @Throws(DataAccessException::class)
-    fun queryForObject(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> Any): Any? =
+    fun <T> queryForObject(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> T): T? =
         query(sql, setValues, mapRow).firstOrNull()
 }

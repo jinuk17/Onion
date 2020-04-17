@@ -36,7 +36,7 @@ class UserDao {
             "SELECT userId, password, name, email FROM users WHERE userId = ?",
             {pstmt : PreparedStatement -> pstmt.setString(1, id) },
             {rs : ResultSet -> user(rs) }
-        ).takeIf { it is User }.let { it as User }
+        )
     }
 
     @Throws(SQLException::class)
@@ -45,7 +45,7 @@ class UserDao {
             "SELECT userId, password, name, email FROM users",
             { },
             {rs : ResultSet -> user(rs) }
-        ).filterIsInstance<User>()
+        )
     }
 
     private fun user(rs: ResultSet): User {

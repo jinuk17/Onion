@@ -12,33 +12,27 @@ class UserDao {
     @Throws(SQLException::class)
     fun insert(user: User): Int? {
         val jdbcTemplate = object : AbstractJdbcTemplate() {
-            override fun setValues(pstmt: PreparedStatement, user: User) {
+            override fun setValues(pstmt: PreparedStatement) {
                 pstmt.setString(1, user.id)
                 pstmt.setString(2, user.password)
                 pstmt.setString(3, user.name)
                 pstmt.setString(4, user.email)
             }
-            override fun createQuery() = "INSERT INTO users VALUES (?, ?, ?, ?)"
         }
-        return jdbcTemplate.update(user)
+        return jdbcTemplate.update("INSERT INTO users VALUES (?, ?, ?, ?)")
     }
-
-
 
     @Throws(SQLException::class)
     fun update(user: User): Int? {
         val jdbcTemplate = object : AbstractJdbcTemplate() {
-            override fun setValues(pstmt: PreparedStatement, user: User) {
+            override fun setValues(pstmt: PreparedStatement) {
                 pstmt.setString(1, user.password)
                 pstmt.setString(2, user.name)
                 pstmt.setString(3, user.email)
                 pstmt.setString(4, user.id)
             }
-
-            override fun createQuery() = "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?"
-
         }
-        return jdbcTemplate.update(user)
+        return jdbcTemplate.update("UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?")
     }
 
     @Throws(SQLException::class)

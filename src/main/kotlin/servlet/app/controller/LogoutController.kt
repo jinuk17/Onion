@@ -1,8 +1,8 @@
-package servlet.controller
+package servlet.app.controller
 
-import servlet.Controller
-import servlet.Controller.Companion.redirect
-import servlet.NotFoundUrlException
+import servlet.core.Controller
+import servlet.core.Controller.Companion.redirect
+import servlet.core.NotFoundUrlException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

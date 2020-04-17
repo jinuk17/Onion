@@ -22,7 +22,7 @@ object WebServeLauncher {
         tomcat.setPort(8080)
 
         val context = tomcat.addWebapp("/", File(webappDirection).absolutePath)
-        val additionWebInfClasses = File("out/production")
+        val additionWebInfClasses = File("out/production/classes")
         val standardRoot = StandardRoot(context)
         standardRoot.addPreResources(DirResourceSet(standardRoot, "/WEB-INF/classes", additionWebInfClasses.absolutePath, "/"))
         context.resources = standardRoot

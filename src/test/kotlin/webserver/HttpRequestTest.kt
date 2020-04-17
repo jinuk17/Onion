@@ -2,6 +2,7 @@ package webserver
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import webserver.framework.http.HttpMethod
 import webserver.framework.http.HttpRequest
 
 class HttpRequestTest {
@@ -13,11 +14,10 @@ class HttpRequestTest {
 
         val request = HttpRequest(input)
 
-        assertEquals("GET", request.getMethod())
+        assertEquals(HttpMethod.GET, request.getMethod())
         assertEquals("/user/create", request.getPath())
         assertEquals("keep-alive", request.getHeader("Connection"))
         assertEquals("javajigi", request.getParameter("userId"))
-
     }
 
     @Test
@@ -26,7 +26,7 @@ class HttpRequestTest {
         val input = javaClass.classLoader.getResourceAsStream("http/HTTP_POST")!!
         val request = HttpRequest(input)
 
-        assertEquals("POST", request.getMethod())
+        assertEquals(HttpMethod.POST, request.getMethod())
         assertEquals("/user/create", request.getPath())
         assertEquals("keep-alive", request.getHeader("Connection"))
         assertEquals("javajigi", request.getParameter("userId"))
@@ -38,7 +38,7 @@ class HttpRequestTest {
         val input = javaClass.classLoader.getResourceAsStream("http/HTTP_POST2")!!
         val request = HttpRequest(input)
 
-        assertEquals("POST", request.getMethod())
+        assertEquals(HttpMethod.POST, request.getMethod())
         assertEquals("/user/create", request.getPath())
         assertEquals("keep-alive", request.getHeader("Connection"))
         assertEquals("1", request.getParameter("id"))

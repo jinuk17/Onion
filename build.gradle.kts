@@ -16,6 +16,11 @@ dependencies {
     implementation("org.apache.tomcat.embed:tomcat-embed-core:8.0.15")
     implementation("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.15")
     implementation("org.apache.tomcat.embed:tomcat-embed-jasper:8.0.15")
+
+    implementation("org.springframework:spring-jdbc:5.2.5.RELEASE")
+    implementation("mysql:mysql-connector-java:5.1.46")
+    implementation("com.zaxxer:HikariCP:3.3.1")
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
 }
 repositories {

@@ -1,13 +1,19 @@
-package servlet.controller
+package servlet.app.controller
 
-import servlet.Controller
-import servlet.Controller.Companion.redirect
+import mu.KotlinLogging
+import servlet.core.Controller
+import servlet.core.Controller.Companion.redirect
+import servlet.app.dao.UserDao
 import webserver.application.model.User
-import webserver.application.repository.UserRepository
+import java.sql.SQLException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class UserCreateController: Controller {
+
+    private val logger = KotlinLogging.logger {}
+
+    private val userDao = UserDao()
 
     override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
         return "/user/form.jsp"
@@ -22,7 +28,11 @@ class UserCreateController: Controller {
             request.getParameter("email")
         )
 
-        UserRepository.save(user)
+        try {
+            userDao.insert(user)
+        }catch(e: SQLException) {
+            logger.error { e.message }
+        }
 
         return redirect("/user/list")
     }

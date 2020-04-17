@@ -1,4 +1,4 @@
-package servlet.controller
+package servlet.app.controller
 
 import webserver.application.model.User
 import javax.servlet.http.HttpServletRequest

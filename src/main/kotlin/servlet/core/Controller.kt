@@ -1,5 +1,6 @@
-package servlet
+package servlet.core
 
+import servlet.core.DispatcherServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

@@ -1,10 +1,9 @@
-package servlet.controller
+package servlet.app.controller
 
-import servlet.Controller
-import servlet.Controller.Companion.redirect
+import servlet.core.Controller
+import servlet.core.Controller.Companion.redirect
 import webserver.application.model.Login
 import webserver.application.service.UserService
-import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

@@ -1,7 +1,6 @@
-package servlet
+package servlet.core
 
-import servlet.controller.*
-import javax.servlet.annotation.WebServlet
+import servlet.app.controller.*
 
 class RequestMapping {
 

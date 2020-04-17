@@ -1,7 +1,7 @@
-package servlet.controller
+package servlet.app.controller
 
-import servlet.Controller
-import servlet.NotFoundUrlException
+import servlet.core.Controller
+import servlet.core.NotFoundUrlException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

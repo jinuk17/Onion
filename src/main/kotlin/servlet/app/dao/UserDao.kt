@@ -11,30 +11,34 @@ class UserDao {
 
     @Throws(SQLException::class)
     fun insert(user: User): Int? {
-        val jdbcTemplate = InsertJdbcTemplate()
-        return jdbcTemplate.insert(user, this)
+        val jdbcTemplate = object : InsertJdbcTemplate() {
+            override fun setValuesForInsert(pstmt: PreparedStatement, user: User) {
+                pstmt.setString(1, user.id)
+                pstmt.setString(2, user.password)
+                pstmt.setString(3, user.name)
+                pstmt.setString(4, user.email)
+            }
+            override fun createQueryForInsert() = "INSERT INTO users VALUES (?, ?, ?, ?)"
+        }
+        return jdbcTemplate.insert(user)
     }
 
-    fun createQueryForInsert() = "INSERT INTO users VALUES (?, ?, ?, ?)"
-    fun setValuesForInsert(it: PreparedStatement, user: User) {
-        it.setString(1, user.id)
-        it.setString(2, user.password)
-        it.setString(3, user.name)
-        it.setString(4, user.email)
-    }
+
 
     @Throws(SQLException::class)
     fun update(user: User): Int? {
-        val jdbcTemplate = UpdateJdbcTemplate()
-        return jdbcTemplate.update(user, this)
-    }
+        val jdbcTemplate = object : UpdateJdbcTemplate() {
+            override fun setValuesForUpdate(pstmt: PreparedStatement, user: User) {
+                pstmt.setString(1, user.password)
+                pstmt.setString(2, user.name)
+                pstmt.setString(3, user.email)
+                pstmt.setString(4, user.id)
+            }
 
-    fun createQueryForUpdate() = "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?"
-    fun setValuesForUpdate(it: PreparedStatement, user: User) {
-        it.setString(1, user.password)
-        it.setString(2, user.name)
-        it.setString(3, user.email)
-        it.setString(4, user.id)
+            override fun createQueryForUpdate() = "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?"
+
+        }
+        return jdbcTemplate.update(user)
     }
 
     @Throws(SQLException::class)

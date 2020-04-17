@@ -2,18 +2,22 @@ package servlet.app.dao
 
 import servlet.core.db.ConnectionManager
 import webserver.application.model.User
+import java.sql.PreparedStatement
 import java.sql.SQLException
 
-class InsertJdbcTemplate {
+abstract class InsertJdbcTemplate {
 
     @Throws(SQLException::class)
-    fun insert(user: User, userDao: UserDao): Int? {
+    fun insert(user: User): Int? {
         ConnectionManager.getConnection().use { conn ->
-            val sql = userDao.createQueryForInsert()
+            val sql = createQueryForInsert()
             conn.prepareStatement(sql).use {
-                userDao.setValuesForInsert(it, user)
+                setValuesForInsert(it, user)
                 return it.executeUpdate()
             }
         }
     }
+
+    abstract fun setValuesForInsert(pstmt: PreparedStatement, user: User)
+    abstract fun createQueryForInsert(): String
 }

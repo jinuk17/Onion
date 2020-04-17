@@ -2,6 +2,7 @@ package servlet.app.dao
 
 import servlet.core.db.ConnectionManager
 import webserver.application.model.User
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
@@ -9,6 +10,7 @@ import java.sql.SQLException
 class UserDao {
 
     private val jdbcTemplate = JdbcTemplate()
+    private val selectJdbcTemplate = SelectJdbcTemplate()
 
     @Throws(SQLException::class)
     fun insert(user: User): Int? {
@@ -32,25 +34,20 @@ class UserDao {
 
     @Throws(SQLException::class)
     fun findById(id: String): User?{
-        ConnectionManager.getConnection().use { conn ->
-            val sql = "SELECT userId, password, name, email FROM users WHERE userId = ?"
-            conn.prepareStatement(sql).use { pstmt ->
-                pstmt.setString(1, id)
-                pstmt.executeQuery().use { return if(it.next()) user(it) else null }
-            }
-        }
+        return selectJdbcTemplate.queryForObject(
+            "SELECT userId, password, name, email FROM users WHERE userId = ?",
+            {pstmt : PreparedStatement -> pstmt.setString(1, id) },
+            {rs : ResultSet -> user(rs) }
+        ).takeIf { it is User }.let { it as User }
     }
 
     @Throws(SQLException::class)
     fun findAll(): List<User> {
-        ConnectionManager.getConnection().use { conn ->
-            val sql = "SELECT userId, password, name, email FROM users"
-            conn.prepareStatement(sql).use { pstmt ->
-                pstmt.executeQuery().use { rs ->
-                    return generateSequence { if(rs.next()) user(rs) else null }.toList()
-                }
-            }
-        }
+        return selectJdbcTemplate.query(
+            "SELECT userId, password, name, email FROM users",
+            { },
+            {rs : ResultSet -> user(rs) }
+        ).filterIsInstance<User>()
     }
 
     private fun user(rs: ResultSet): User {

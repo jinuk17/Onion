@@ -1,6 +1,5 @@
 package servlet.app.dao
 
-import servlet.core.db.ConnectionManager
 import webserver.application.model.User
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -10,7 +9,6 @@ import java.sql.SQLException
 class UserDao {
 
     private val jdbcTemplate = JdbcTemplate()
-    private val selectJdbcTemplate = SelectJdbcTemplate()
 
     @Throws(SQLException::class)
     fun insert(user: User): Int? {
@@ -34,7 +32,7 @@ class UserDao {
 
     @Throws(SQLException::class)
     fun findById(id: String): User?{
-        return selectJdbcTemplate.queryForObject(
+        return jdbcTemplate.queryForObject(
             "SELECT userId, password, name, email FROM users WHERE userId = ?",
             {pstmt : PreparedStatement -> pstmt.setString(1, id) },
             {rs : ResultSet -> user(rs) }
@@ -43,7 +41,7 @@ class UserDao {
 
     @Throws(SQLException::class)
     fun findAll(): List<User> {
-        return selectJdbcTemplate.query(
+        return jdbcTemplate.query(
             "SELECT userId, password, name, email FROM users",
             { },
             {rs : ResultSet -> user(rs) }

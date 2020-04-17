@@ -6,7 +6,7 @@ import java.sql.SQLException
 import javax.sql.DataSource
 
 
-object ConnectionManger {
+object ConnectionManager {
     private const val DB_DRIVER = "com.mysql.jdbc.Driver"
     private const val DB_URL = "jdbc:mysql://localhost:3306/onion"
     private const val DB_USERNAME = "admin"

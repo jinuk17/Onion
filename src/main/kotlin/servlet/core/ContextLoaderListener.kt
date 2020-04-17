@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
-import servlet.core.db.ConnectionManger
+import servlet.core.db.ConnectionManager
 import javax.servlet.ServletContextEvent
 import javax.servlet.ServletContextListener
 import javax.servlet.annotation.WebListener
@@ -17,7 +17,7 @@ class ContextLoaderListener: ServletContextListener {
     override fun contextInitialized(sce: ServletContextEvent?) {
         val populator = ResourceDatabasePopulator()
         populator.addScript(ClassPathResource("jwp.sql"))
-        DatabasePopulatorUtils.execute(populator, ConnectionManger.getDataSource())
+        DatabasePopulatorUtils.execute(populator, ConnectionManager.getDataSource())
 
         logger.info("Completed load ServletContext!")
     }

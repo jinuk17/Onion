@@ -1,6 +1,6 @@
 package servlet.app.dao
 
-import servlet.core.db.ConnectionManger
+import servlet.core.db.ConnectionManager
 import webserver.application.model.User
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -11,58 +11,46 @@ class UserDao {
 
     @Throws(SQLException::class)
     fun insert(user: User): Int? {
-        ConnectionManger.getConnection().use { conn ->
-            val sql = createQueryForInsert()
-            conn.prepareStatement(sql).use {
-                setValuesForInsert(it, user)
-                return it.executeUpdate()
-            }
-        }
+        val jdbcTemplate = InsertJdbcTemplate()
+        return jdbcTemplate.insert(user, this)
     }
 
-    @Throws(SQLException::class)
-    fun update(user: User): Int? {
-        ConnectionManger.getConnection().use { conn ->
-            val sql = createQueryForUpdate()
-            conn.prepareStatement(sql).use {
-                setValuesForUpdate(it, user)
-                return it.executeUpdate()
-            }
-        }
-    }
-
-    private fun createQueryForInsert() = "INSERT INTO users VALUES (?, ?, ?, ?)"
-    private fun createQueryForUpdate() = "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?"
-
-    private fun setValuesForInsert(it: PreparedStatement, user: User) {
+    fun createQueryForInsert() = "INSERT INTO users VALUES (?, ?, ?, ?)"
+    fun setValuesForInsert(it: PreparedStatement, user: User) {
         it.setString(1, user.id)
         it.setString(2, user.password)
         it.setString(3, user.name)
         it.setString(4, user.email)
     }
 
-    private fun setValuesForUpdate(it: PreparedStatement, user: User) {
+    @Throws(SQLException::class)
+    fun update(user: User): Int? {
+        val jdbcTemplate = UpdateJdbcTemplate()
+        return jdbcTemplate.update(user, this)
+    }
+
+    fun createQueryForUpdate() = "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?"
+    fun setValuesForUpdate(it: PreparedStatement, user: User) {
         it.setString(1, user.password)
         it.setString(2, user.name)
         it.setString(3, user.email)
         it.setString(4, user.id)
     }
 
-
     @Throws(SQLException::class)
     fun findById(id: String): User?{
-        ConnectionManger.getConnection().use { conn ->
+        ConnectionManager.getConnection().use { conn ->
             val sql = "SELECT userId, password, name, email FROM users WHERE userId = ?"
             conn.prepareStatement(sql).use { pstmt ->
                 pstmt.setString(1, id)
-                pstmt.executeQuery().use { return user(it) }
+                pstmt.executeQuery().use { return if(it.next()) user(it) else null }
             }
         }
     }
 
     @Throws(SQLException::class)
     fun findAll(): List<User> {
-        ConnectionManger.getConnection().use { conn ->
+        ConnectionManager.getConnection().use { conn ->
             val sql = "SELECT userId, password, name, email FROM users"
             conn.prepareStatement(sql).use { pstmt ->
                 pstmt.executeQuery().use { rs ->

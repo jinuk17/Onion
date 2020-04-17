@@ -8,12 +8,12 @@ import java.sql.SQLException
 class JdbcTemplate {
 
     @Throws(DataAccessException::class)
-    fun update(sql: String, setValues: (PreparedStatement) -> Unit): Int? {
+    fun update(sql: String, vararg values: Any): Int? {
         try {
             ConnectionManager.getConnection().use { conn ->
-                conn.prepareStatement(sql).use {
-                    setValues(it)
-                    return it.executeUpdate()
+                conn.prepareStatement(sql).use { pstmt ->
+                    values.forEachIndexed{ i, v -> pstmt.setObject(i+1, v) }
+                    return pstmt.executeUpdate()
                 }
             }
         }catch (e: SQLException) {
@@ -23,11 +23,11 @@ class JdbcTemplate {
     }
 
     @Throws(DataAccessException::class)
-    fun <T> query(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> T): List<T> {
+    fun <T> query(sql: String, vararg values: Any, mapRow: (ResultSet) -> T): List<T> {
         try{
             ConnectionManager.getConnection().use { conn ->
                 conn.prepareStatement(sql).use { pstmt ->
-                    setValues(pstmt)
+                    values.forEachIndexed{ i, v -> pstmt.setObject(i+1, v) }
                     pstmt.executeQuery().use {
                         return generateSequence { if(it.next()) mapRow(it) else null }.toList()
                     }
@@ -39,6 +39,6 @@ class JdbcTemplate {
     }
 
     @Throws(DataAccessException::class)
-    fun <T> queryForObject(sql: String, setValues: (PreparedStatement) -> Unit, mapRow: (ResultSet) -> T): T? =
-        query(sql, setValues, mapRow).firstOrNull()
+    fun <T> queryForObject(sql: String, vararg values: Any, mapRow: (ResultSet) -> T): T? =
+        query(sql, values, mapRow = mapRow).firstOrNull()
 }

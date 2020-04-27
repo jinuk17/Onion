@@ -23,7 +23,8 @@ class UserDao {
 
     @Throws(SQLException::class)
     fun update(user: User): Int? {
-        return jdbcTemplate.update("UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?",
+        return jdbcTemplate.update(
+            "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?",
             user.password,
             user.name,
             user.email,
@@ -34,7 +35,7 @@ class UserDao {
     @Throws(SQLException::class)
     fun findById(id: String): User?{
         return jdbcTemplate.queryForObject(
-            "SELECT userId, password, name, email FROM users WHERE userId = ?", id) {user(it) }
+            "SELECT userId, password, name, email FROM users WHERE userId = ?", id) { user(it) }
     }
 
     @Throws(SQLException::class)

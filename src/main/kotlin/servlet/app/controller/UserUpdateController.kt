@@ -11,7 +11,7 @@ import webserver.application.repository.UserRepository
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class UserUpdateController: Controller {
+class UserUpdateController : Controller {
 
     val userDao = UserDao()
 
@@ -36,7 +36,8 @@ class UserUpdateController: Controller {
     private fun getAuthorizedUser(req: HttpServletRequest): User {
         val sessionUser = Authentication.getSessionUser(req) ?: throw NotAuthenticationException()
         val user = req.getParameter("userId")?.let { UserRepository.get(it) } ?: throw UserNotFoundException()
-        if (sessionUser.id != user.id) { throw NotAuthorizedException()
+        if (sessionUser.id != user.id) {
+            throw NotAuthorizedException()
         }
         return sessionUser
     }

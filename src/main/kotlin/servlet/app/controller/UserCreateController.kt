@@ -9,7 +9,7 @@ import java.sql.SQLException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class UserCreateController: Controller {
+class UserCreateController : Controller {
 
     private val logger = KotlinLogging.logger {}
 
@@ -30,7 +30,7 @@ class UserCreateController: Controller {
 
         try {
             userDao.insert(user)
-        }catch(e: SQLException) {
+        } catch (e: SQLException) {
             logger.error { e.message }
         }
 

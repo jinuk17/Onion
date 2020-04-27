@@ -8,13 +8,13 @@ import webserver.application.repository.UserRepository
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class UserListController: Controller {
+class UserListController : Controller {
 
     private val userDao = UserDao()
 
     override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
 
-        if(!Authentication.hasUserSession(request)) return redirect("/user/login")
+        if (!Authentication.hasUserSession(request)) return redirect("/user/login")
 
         request.setAttribute("users", userDao.findAll())
         return "/user/list.jsp"

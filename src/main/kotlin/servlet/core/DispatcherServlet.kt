@@ -23,8 +23,9 @@ class DispatcherServlet: HttpServlet() {
         val controller = requestMapping.getController(req.requestURI) ?: throw NotFoundUrlException()
 
         val viewName = if(req.method == "POST") controller.post(req, resp) else controller.get(req, resp)
-        move(viewName, req, resp)
-
+        if(viewName.isNotBlank()) {
+            move(viewName, req, resp)
+        }
     }
 
     private fun move(
@@ -32,6 +33,7 @@ class DispatcherServlet: HttpServlet() {
         req: HttpServletRequest,
         resp: HttpServletResponse
     ) {
+
         if (viewName.startsWith(REDIRECT_PREFIX)) {
             resp.sendRedirect(viewName.substring(REDIRECT_PREFIX.length))
             return

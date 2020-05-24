@@ -11,7 +11,7 @@ class UserDao {
     private val jdbcTemplate = JdbcTemplate()
 
     @Throws(SQLException::class)
-    fun insert(user: User): Int? {
+    fun insert(user: User): Int {
         return jdbcTemplate.update(
             "INSERT INTO users VALUES (?, ?, ?, ?)",
             user.id,
@@ -22,7 +22,7 @@ class UserDao {
     }
 
     @Throws(SQLException::class)
-    fun update(user: User): Int? {
+    fun update(user: User): Int {
         return jdbcTemplate.update(
             "UPDATE users set password = ?, name = ?, email = ? WHERE userId = ?",
             user.password,

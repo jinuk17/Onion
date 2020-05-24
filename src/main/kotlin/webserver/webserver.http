@@ -29,3 +29,8 @@ userId=javajigi&password=password
 GET localhost:8080/hello
 
 ###
+
+POST localhost:8080/api/qna/answer
+Content-Type: application/x-www-form-urlencoded
+
+writer=aaa&contents=하하하&questionId=1

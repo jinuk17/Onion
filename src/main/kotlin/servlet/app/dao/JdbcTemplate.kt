@@ -3,22 +3,32 @@ package servlet.app.dao
 import servlet.core.db.ConnectionManager
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.sql.Statement
 
 class JdbcTemplate {
 
     @Throws(DataAccessException::class)
-    fun update(sql: String, vararg values: Any): Int? {
+    fun update(sql: String, vararg values: Any, keyHolder: KeyHolder? = null): Int {
         try {
             ConnectionManager.getConnection().use { conn ->
-                conn.prepareStatement(sql).use { pstmt ->
+                conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { pstmt ->
                     values.forEachIndexed{ i, v -> pstmt.setObject(i+1, v) }
-                    return pstmt.executeUpdate()
+                    val count = pstmt.executeUpdate()
+
+                    keyHolder?.let { kh ->
+                        pstmt.generatedKeys.use {
+                            if (it.next()) {
+                                kh.id = it.getLong(1)
+                            }
+                        }
+                    }
+
+                    return count
                 }
             }
         }catch (e: SQLException) {
             throw DataAccessException(e)
         }
-
     }
 
     @Throws(DataAccessException::class)

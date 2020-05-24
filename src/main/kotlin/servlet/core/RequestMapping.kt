@@ -12,6 +12,7 @@ class RequestMapping {
         addController("/user/create", UserCreateController())
         addController("/user/list", UserListController())
         addController("/user/update", UserUpdateController())
+        addController("/api/qna/answer", AddAnswerController())
     }
 
     fun getController(url: String): Controller? {

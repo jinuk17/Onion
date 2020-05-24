@@ -1,9 +1,10 @@
 package servlet.app.controller
 
 import mu.KotlinLogging
-import servlet.core.Controller
-import servlet.core.Controller.Companion.redirect
 import servlet.app.dao.UserDao
+import servlet.core.mvc.*
+import servlet.core.mvc.Controller.Companion.jspView
+import servlet.core.mvc.Controller.Companion.redirectView
 import webserver.application.model.User
 import java.sql.SQLException
 import javax.servlet.http.HttpServletRequest
@@ -15,11 +16,11 @@ class UserCreateController : Controller {
 
     private val userDao = UserDao()
 
-    override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
-        return "/user/form.jsp"
+    override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
+        return jspView("/user/form.jsp")
     }
 
-    override fun post(request: HttpServletRequest, response: HttpServletResponse): String {
+    override fun post(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
 
         val user = User(
             request.getParameter("userId"),
@@ -34,6 +35,6 @@ class UserCreateController : Controller {
             logger.error { e.message }
         }
 
-        return redirect("/user/list")
+        return redirectView("/user/list")
     }
 }

@@ -1,6 +1,8 @@
-package servlet.core
+package servlet.core.mvc
 
 import mu.KotlinLogging
+import servlet.core.NotFoundUrlException
+import servlet.core.RequestMapping
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
@@ -22,26 +24,7 @@ class DispatcherServlet: HttpServlet() {
 
         val controller = requestMapping.getController(req.requestURI) ?: throw NotFoundUrlException()
 
-        val viewName = if(req.method == "POST") controller.post(req, resp) else controller.get(req, resp)
-        if(viewName.isNotBlank()) {
-            move(viewName, req, resp)
-        }
-    }
-
-    private fun move(
-        viewName: String,
-        req: HttpServletRequest,
-        resp: HttpServletResponse
-    ) {
-
-        if (viewName.startsWith(REDIRECT_PREFIX)) {
-            resp.sendRedirect(viewName.substring(REDIRECT_PREFIX.length))
-            return
-        }
-        req.getRequestDispatcher(viewName).forward(req, resp)
-    }
-
-    companion object {
-        internal const val REDIRECT_PREFIX = "redirect:"
+        val modelAndView = if(req.method == "POST") controller.post(req, resp) else controller.get(req, resp)
+        modelAndView.renderView(req, resp)
     }
 }

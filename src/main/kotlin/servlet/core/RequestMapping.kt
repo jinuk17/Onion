@@ -1,12 +1,12 @@
 package servlet.core
 
 import servlet.app.controller.*
+import servlet.core.mvc.Controller
 
 class RequestMapping {
 
     private val urlMappings: MutableMap<String, Controller> = mutableMapOf()
     init {
-        addController("/hello", HelloWorldController())
         addController("/user/login", LoginController())
         addController("/user/logout", LogoutController())
         addController("/user/create", UserCreateController())

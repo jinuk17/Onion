@@ -1,7 +1,8 @@
 package servlet.app.controller
 
-import servlet.core.Controller
-import servlet.core.Controller.Companion.redirect
+import servlet.core.mvc.*
+import servlet.core.mvc.Controller.Companion.jspView
+import servlet.core.mvc.Controller.Companion.redirectView
 import webserver.application.model.Login
 import webserver.application.service.UserService
 import javax.servlet.http.HttpServletRequest
@@ -11,24 +12,19 @@ class LoginController : Controller {
 
     private val userService = UserService()
 
-    override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
-        return "/user/login.jsp"
+    override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
+        return jspView("/user/login.jsp")
     }
 
-    override fun post(request: HttpServletRequest, response: HttpServletResponse): String {
+    override fun post(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val login = Login(
             request.getParameter("userId"),
             request.getParameter("password")
         )
 
-        val user = userService.login(login) ?: return loginFailed(request)
+        val user = userService.login(login) ?: return jspView("/user/login.jsp").addObject("loginFailed", true)
 
         request.session.setAttribute("user", user)
-        return redirect("/index.jsp")
-    }
-
-    private fun loginFailed(req: HttpServletRequest): String {
-        req.setAttribute("loginFailed", true)
-        return "/user/login.jsp"
+        return redirectView("/index.jsp")
     }
 }

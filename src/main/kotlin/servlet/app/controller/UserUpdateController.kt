@@ -1,8 +1,9 @@
 package servlet.app.controller
 
 import servlet.app.dao.UserDao
-import servlet.core.Controller
-import servlet.core.Controller.Companion.redirect
+import servlet.core.mvc.*
+import servlet.core.mvc.Controller.Companion.jspView
+import servlet.core.mvc.Controller.Companion.redirectView
 import webserver.application.NotAuthenticationException
 import webserver.application.NotAuthorizedException
 import webserver.application.model.User
@@ -13,15 +14,15 @@ import javax.servlet.http.HttpServletResponse
 
 class UserUpdateController : Controller {
 
-    val userDao = UserDao()
+    private val userDao = UserDao()
 
-    override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
+    override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val user = getAuthorizedUser(request)
         request.setAttribute("user", user)
-        return "/user/update.jsp"
+        return jspView("/user/update.jsp")
     }
 
-    override fun post(request: HttpServletRequest, response: HttpServletResponse): String {
+    override fun post(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
 
         val user = getAuthorizedUser(request)
         val save = user.copy(
@@ -30,7 +31,7 @@ class UserUpdateController : Controller {
             email = request.getParameter("email") ?: user.email
         )
         userDao.update(save)
-        return redirect("/user/list")
+        return redirectView("/user/list")
     }
 
     private fun getAuthorizedUser(req: HttpServletRequest): User {

@@ -2,10 +2,15 @@ package servlet.app.controller
 
 import mu.KotlinLogging
 import servlet.app.dao.AnswerDao
-import servlet.core.Controller
+import servlet.core.mvc.Controller
 import servlet.core.NotFoundUrlException
 import servlet.core.OnionObjectMapper
+import servlet.core.mvc.Controller.Companion.jsonView
+import servlet.core.mvc.JsonView
+import servlet.core.mvc.ModelAndView
+import servlet.core.mvc.View
 import webserver.application.model.CreateAnswer
+import java.lang.IllegalStateException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -14,13 +19,12 @@ class AddAnswerController : Controller {
     private val logger = KotlinLogging.logger {}
 
     private val answerDao = AnswerDao()
-    private val mapper = OnionObjectMapper.mapper
 
-    override fun get(request: HttpServletRequest, response: HttpServletResponse): String {
+    override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         throw NotFoundUrlException()
     }
 
-    override fun post(request: HttpServletRequest, response: HttpServletResponse): String {
+    override fun post(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
 
         val create = CreateAnswer(
             request.getParameter("writer"),
@@ -29,16 +33,8 @@ class AddAnswerController : Controller {
         )
 
         logger.info { "answer : $create" }
-
-        val answer = answerDao.insert(create)
-
-        response.contentType = ("application/json;charset=UTF-8")
-        val out = response.writer
-
-        answer?.let {
-            out.print(mapper.writeValueAsString(it))
-        }
-        return ""
+        val answer = answerDao.insert(create)?: throw IllegalStateException("failed user creation.")
+        return jsonView().addObject("answer", answer)
     }
 
 }

@@ -10,14 +10,13 @@ import servlet.core.di.BeanFactory
 import servlet.core.di.ClasspathBeanDefinitionScanner
 import javax.servlet.http.HttpServletRequest
 
-class AnnotationHandlerMapping(vararg basePackage: Any) : HandlerMapping {
+class AnnotationHandlerMapping(applicationContext: ApplicationContext) : HandlerMapping {
 
     val logger = KotlinLogging.logger {}
 
     private val handlerExecutions: Map<HandleKey, HandlerExecution>
 
     init {
-        val applicationContext = ApplicationContext(basePackage)
         handlerExecutions = getControllers(applicationContext)
     }
 

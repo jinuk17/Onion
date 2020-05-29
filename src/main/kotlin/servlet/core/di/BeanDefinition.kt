@@ -4,7 +4,7 @@ import java.lang.IllegalStateException
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 
-class BeanDefinition(private val clazz: Class<*>) {
+open class BeanDefinition(private val clazz: Class<*>) {
 
     private val injectConstructor: Constructor<*>?
     private val injectFields: Set<Field>

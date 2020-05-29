@@ -27,7 +27,7 @@ object BeanFactoryUtils {
                 return clazz
             }
         }
-        throw IllegalStateException("Not fount concreteClass of ${injectedClazz.toString()}")
+        throw IllegalStateException("Not fount concreteClass of $injectedClazz")
     }
 
     fun getInjectedFields(clazz: Class<*>): Set<Field>  {
@@ -40,5 +40,9 @@ object BeanFactoryUtils {
             ReflectionUtils.withAnnotation(Inject::class.java),
             ReflectionUtils.withReturnType(Unit::class.java)
         ).orEmpty().toSet()
+    }
+
+    fun getBeanMethods(annotatedClass: Class<*>, annotation: Class<out Annotation> ): Set<Method> {
+        return ReflectionUtils.getAllMethods(annotatedClass, ReflectionUtils.withAnnotation(annotation))
     }
 }

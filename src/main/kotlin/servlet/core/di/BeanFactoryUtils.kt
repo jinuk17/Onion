@@ -27,7 +27,7 @@ object BeanFactoryUtils {
                 return clazz
             }
         }
-        throw IllegalStateException("Not fount concreteClass of $injectedClazz")
+        throw IllegalStateException("Not fount concreteClass of ${injectedClazz.toString()}")
     }
 
     fun getInjectedFields(clazz: Class<*>): Set<Field>  {

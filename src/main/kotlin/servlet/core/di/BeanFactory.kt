@@ -14,7 +14,8 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
     private val beans: MutableMap<Class<*>, Any> = mutableMapOf()
 
     init {
-        preInstantiateBeans.forEach { instantiateClass(it) }
+        val constructorInjector = ConstructorInjector(this)
+        preInstantiateBeans.forEach { constructorInjector.inject(it) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -29,25 +30,12 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
             .toMap()
     }
 
-    private fun instantiateClass(clazz: Class<*>): Any {
-        return beans.getOrPut(clazz) {
-            val injectedConstructor = BeanFactoryUtils.getInjectedConstructor(clazz)
-                ?: return clazz.newInstance()
-
-            return instantiateConstructor(injectedConstructor)
-        }
+    fun getOrRegister(clazz: Class<*>, instantiateBean: () -> Any): Any {
+        return beans.getOrPut(clazz) { instantiateBean() }
     }
 
-    private fun instantiateConstructor(constructor: Constructor<*>): Any {
-
-        val args = constructor.parameterTypes.map {
-            val concreteClass = BeanFactoryUtils.findConcreteClass(it, preInstantiateBeans)
-            if (!preInstantiateBeans.contains(concreteClass)) {
-                throw IllegalStateException("$it is not a Bean.")
-            }
-            instantiateClass(it)
-        }
-
-        return BeanUtils.instantiateClass(constructor, *args.toTypedArray())
+    fun isPreInstantiateBean(clazz: Class<*>): Boolean {
+        val concreteClass = BeanFactoryUtils.findConcreteClass(clazz, preInstantiateBeans)
+        return preInstantiateBeans.contains(concreteClass)
     }
 }

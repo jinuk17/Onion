@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class DispatcherServlet(private vararg val basePackage: Any) : HttpServlet() {
+class DispatcherServlet(private val handlerMapping: HandlerMapping) : HttpServlet() {
 
     private val logger = KotlinLogging.logger {}
     private val mappings: MutableList<HandlerMapping> = mutableListOf()
@@ -17,7 +17,7 @@ class DispatcherServlet(private vararg val basePackage: Any) : HttpServlet() {
 
     override fun init() {
         mappings.add(LegacyRequestMapping())
-        mappings.add(AnnotationHandlerMapping(basePackage))
+        mappings.add(handlerMapping)
 
         handlerAdapters.add(ControllerHandlerAdapter())
         handlerAdapters.add(HandlerExecutionHandlerAdapter())

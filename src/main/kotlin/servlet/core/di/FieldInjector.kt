@@ -1,34 +1,27 @@
 package servlet.core.di
 
 import mu.KotlinLogging
-import org.springframework.beans.BeanUtils
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
-import java.lang.reflect.Constructor
+import java.lang.reflect.Field
 
-class FieldInjector(private val beanFactory: BeanFactory) : Injector {
+class FieldInjector(beanFactory: BeanFactory) : AbstractInjector<Field>(beanFactory) {
 
     private val logger = KotlinLogging.logger {}
-    private val constructorInjector: ConstructorInjector = ConstructorInjector(beanFactory)
 
-    override fun inject(clazz: Class<*>) {
-        instantiateClass(clazz)
-        BeanFactoryUtils.getInjectedFields(clazz).forEach {
-            try {
-                val bean = instantiateClass(it.type)
-                it.isAccessible = true
-                it.set(beanFactory.getBean(it.declaringClass), bean)
-            } catch (e: Exception) {
-                when (e) {
-                    is IllegalAccessException, is IllegalArgumentException -> logger.error { e }
-                    else -> throw e
-                }
+    override fun inject(injectedType: Field, bean: Any, beanFactory: BeanFactory) {
+        try {
+            injectedType.apply {
+                isAccessible = true
+                set(beanFactory.getBean(declaringClass), bean)
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is IllegalAccessException, is IllegalArgumentException -> logger.error { e }
+                else -> throw e
             }
         }
     }
 
-    private fun instantiateClass(clazz: Class<*>): Any {
-        constructorInjector.inject(clazz)
-        return beanFactory.getBean(clazz)
-    }
+    override fun getInjectedBeans(clazz: Class<*>): Set<Field> = BeanFactoryUtils.getInjectedFields(clazz)
+
+    override fun instantiateBean(injectedType: Field): Any? = instantiateClass(injectedType.type)
 }

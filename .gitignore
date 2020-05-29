@@ -114,3 +114,6 @@ hs_err_pid*
 
 /.idea/
 /tomcat.8080/work/Tomcat/localhost/ROOT/org/apache/jsp/
+
+# mac
+.DS_Store

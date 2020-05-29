@@ -6,12 +6,12 @@ import servlet.core.annotation.Controller
 import java.lang.IllegalStateException
 import java.lang.reflect.Constructor
 
-
-class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
+class BeanFactory : BeanDefinitionRegistry {
 
     private val logger = KotlinLogging.logger {}
 
     private val beans: MutableMap<Class<*>, Any> = mutableMapOf()
+    private val beanDefinitions: MutableMap<Class<*>, BeanDefinition> = mutableMapOf()
     private val injectors: List<Injector>
 
     init {
@@ -20,10 +20,10 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
             SetterInjector(this),
             ConstructorInjector(this)
         )
+    }
 
-        preInstantiateBeans.forEach {
-            logger.debug { "instantiated Class : $it" }
-            inject(it) }
+    fun initialize() {
+        getBeanClasses().forEach { getBean(it) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -32,7 +32,7 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
     }
 
     fun getControllers(): Map<Class<*>, Any> {
-        return preInstantiateBeans
+        return getBeanClasses()
             .filter { it.getAnnotation(Controller::class.java) != null }
             .mapNotNull { beans[it]?.let { bean -> it to bean }  }
             .toMap()
@@ -43,11 +43,21 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
     }
 
     fun isPreInstantiateBean(clazz: Class<*>): Boolean {
-        val concreteClass = BeanFactoryUtils.findConcreteClass(clazz, preInstantiateBeans)
-        return preInstantiateBeans.contains(concreteClass)
+        val beanClasses = getBeanClasses()
+        val concreteClass = BeanFactoryUtils.findConcreteClass(clazz, beanClasses)
+        return beanClasses.contains(concreteClass)
     }
 
     private fun inject(clazz: Class<*>) {
         injectors.forEach { it.inject(clazz) }
+    }
+
+    private fun getBeanClasses(): Set<Class<*>> {
+        return beanDefinitions.keys.toSet()
+    }
+
+    override fun registerBeanDefinition(clazz: Class<*>, beanDefinition: BeanDefinition) {
+        logger.debug { "register bean : $clazz" }
+        beanDefinitions[clazz] = beanDefinition
     }
 }

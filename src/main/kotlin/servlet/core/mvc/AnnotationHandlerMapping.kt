@@ -5,6 +5,7 @@ import org.reflections.ReflectionUtils
 import servlet.core.annotation.RequestMapping
 import servlet.core.annotation.RequestMethod
 import servlet.core.di.BeanFactory
+import servlet.core.di.ClasspathBeanDefinitionScanner
 import javax.servlet.http.HttpServletRequest
 
 class AnnotationHandlerMapping(vararg basePackage: Any) : HandlerMapping {
@@ -14,8 +15,11 @@ class AnnotationHandlerMapping(vararg basePackage: Any) : HandlerMapping {
     private val handlerExecutions: Map<HandleKey, HandlerExecution>
 
     init {
-        val beanScanner = BeanScanner(basePackage)
-        val beanFactory = BeanFactory(beanScanner.scan())
+        val beanFactory = BeanFactory()
+        val scanner = ClasspathBeanDefinitionScanner(beanFactory)
+        scanner.doScan(basePackage)
+        beanFactory.initialize()
+
         handlerExecutions = beanFactory.getControllers().keys.flatMap { clazz ->
             ReflectionUtils.getAllMethods(clazz, ReflectionUtils.withAnnotation(RequestMapping::class.java))
                 .mapNotNull { method ->

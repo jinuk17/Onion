@@ -1,3 +1,3 @@
 package servlet.core.di
 
-class BeanDefinition {}
+class BeanDefinition(clazz: Class<*>) {}

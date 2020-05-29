@@ -27,15 +27,8 @@ class BeanFactory : BeanDefinitionRegistry {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> getBean(requiredType: Class<T>): T {
+    fun <T> getBean(requiredType: Class<T>): T? {
         return beans[requiredType] as T
-    }
-
-    fun getControllers(): Map<Class<*>, Any> {
-        return getBeanClasses()
-            .filter { it.getAnnotation(Controller::class.java) != null }
-            .mapNotNull { beans[it]?.let { bean -> it to bean }  }
-            .toMap()
     }
 
     fun getOrRegister(clazz: Class<*>, instantiateBean: () -> Any): Any {
@@ -48,11 +41,7 @@ class BeanFactory : BeanDefinitionRegistry {
         return beanClasses.contains(concreteClass)
     }
 
-    private fun inject(clazz: Class<*>) {
-        injectors.forEach { it.inject(clazz) }
-    }
-
-    private fun getBeanClasses(): Set<Class<*>> {
+    fun getBeanClasses(): Set<Class<*>> {
         return beanDefinitions.keys.toSet()
     }
 
@@ -60,4 +49,9 @@ class BeanFactory : BeanDefinitionRegistry {
         logger.debug { "register bean : $clazz" }
         beanDefinitions[clazz] = beanDefinition
     }
+
+    private fun inject(clazz: Class<*>) {
+        injectors.forEach { it.inject(clazz) }
+    }
+
 }

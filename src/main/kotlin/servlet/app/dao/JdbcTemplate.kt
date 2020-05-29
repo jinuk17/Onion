@@ -1,10 +1,12 @@
 package servlet.app.dao
 
+import servlet.core.annotation.Component
 import servlet.core.db.ConnectionManager
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 
+@Component
 class JdbcTemplate {
 
     @Throws(DataAccessException::class)

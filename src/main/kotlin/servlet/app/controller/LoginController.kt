@@ -1,14 +1,14 @@
 package servlet.app.controller
 
 import servlet.core.mvc.*
-import servlet.core.mvc.Controller.Companion.jspView
-import servlet.core.mvc.Controller.Companion.redirectView
+import servlet.core.mvc.LegacyController.Companion.jspView
+import servlet.core.mvc.LegacyController.Companion.redirectView
 import servlet.app.model.Login
 import webserver.application.service.UserService
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class LoginController : Controller {
+class LoginController : LegacyController {
 
     private val userService = UserService()
 

@@ -3,14 +3,15 @@ package servlet.app.dao
 import servlet.app.dao.DateExtensions.toLocalDateTime
 import servlet.app.model.Answer
 import servlet.app.model.CreateAnswer
+import servlet.core.annotation.Inject
+import servlet.core.annotation.Repository
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class AnswerDao {
-
-    private val jdbcTemplate = JdbcTemplate()
+@Repository
+class AnswerDao @Inject constructor(private val jdbcTemplate: JdbcTemplate) {
 
     fun insert(create: CreateAnswer): Answer? {
         val keyHolder = KeyHolder()

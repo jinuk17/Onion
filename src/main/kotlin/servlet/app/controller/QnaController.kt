@@ -4,7 +4,7 @@ import servlet.app.service.MyQnaService
 import servlet.core.annotation.Controller
 import servlet.core.annotation.Inject
 import servlet.core.annotation.RequestMapping
-import servlet.core.mvc.Controller.Companion.jspView
+import servlet.core.mvc.LegacyController.Companion.jspView
 import servlet.core.mvc.ModelAndView
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

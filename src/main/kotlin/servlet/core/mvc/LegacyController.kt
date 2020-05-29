@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 
-interface Controller {
+interface LegacyController {
     fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView
     fun post(request: HttpServletRequest, response: HttpServletResponse): ModelAndView
 

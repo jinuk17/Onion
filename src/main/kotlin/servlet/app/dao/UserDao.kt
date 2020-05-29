@@ -1,13 +1,13 @@
 package servlet.app.dao
 
 import servlet.app.model.User
+import servlet.core.annotation.Inject
+import servlet.core.annotation.Repository
 import java.sql.ResultSet
 import java.sql.SQLException
 
-
-class UserDao {
-
-    private val jdbcTemplate = JdbcTemplate()
+@Repository
+class UserDao @Inject constructor(private val jdbcTemplate: JdbcTemplate) {
 
     @Throws(SQLException::class)
     fun insert(user: User): Int {

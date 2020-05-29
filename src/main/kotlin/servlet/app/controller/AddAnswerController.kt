@@ -2,20 +2,21 @@ package servlet.app.controller
 
 import mu.KotlinLogging
 import servlet.app.dao.AnswerDao
-import servlet.core.mvc.Controller
+import servlet.core.mvc.LegacyController
 import servlet.core.NotFoundUrlException
-import servlet.core.mvc.Controller.Companion.jsonView
+import servlet.core.mvc.LegacyController.Companion.jsonView
 import servlet.core.mvc.ModelAndView
 import servlet.app.model.CreateAnswer
+import servlet.core.annotation.Controller
+import servlet.core.annotation.Inject
 import java.lang.IllegalStateException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class AddAnswerController : Controller {
+@Controller
+class AddAnswerController @Inject constructor(private val answerDao: AnswerDao): LegacyController {
 
     private val logger = KotlinLogging.logger {}
-
-    private val answerDao = AnswerDao()
 
     override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         throw NotFoundUrlException()

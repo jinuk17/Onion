@@ -1,11 +1,11 @@
 package servlet.app.dao
 
 import servlet.app.model.Question
+import servlet.core.annotation.Inject
+import servlet.core.annotation.Repository
 
-
-class QuestionDao {
-
-    private val jdbcTemplate = JdbcTemplate()
+@Repository
+class QuestionDao @Inject constructor(private val jdbcTemplate: JdbcTemplate) {
 
     fun insert(question: Question) {
 

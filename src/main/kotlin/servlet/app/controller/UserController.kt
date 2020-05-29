@@ -4,19 +4,17 @@ import servlet.app.dao.UserDao
 import servlet.app.model.User
 import servlet.app.model.UserNotFoundException
 import servlet.core.annotation.Controller
+import servlet.core.annotation.Inject
 import servlet.core.annotation.RequestMapping
 import servlet.core.annotation.RequestMethod
-import servlet.core.mvc.Controller.Companion.jspView
-import servlet.core.mvc.Controller.Companion.redirectView
+import servlet.core.mvc.LegacyController.Companion.jspView
+import servlet.core.mvc.LegacyController.Companion.redirectView
 import servlet.core.mvc.ModelAndView
-import java.lang.IllegalArgumentException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Controller
-class UserController {
-
-    private val userDao: UserDao = UserDao()
+class UserController @Inject constructor(private val userDao: UserDao) {
 
     @RequestMapping("/users")
     fun list(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {

@@ -2,19 +2,20 @@ package servlet.app.controller
 
 import servlet.app.dao.UserDao
 import servlet.core.mvc.*
-import servlet.core.mvc.Controller.Companion.jspView
-import servlet.core.mvc.Controller.Companion.redirectView
+import servlet.core.mvc.LegacyController.Companion.jspView
+import servlet.core.mvc.LegacyController.Companion.redirectView
 import webserver.application.NotAuthenticationException
 import webserver.application.NotAuthorizedException
 import servlet.app.model.User
 import servlet.app.model.UserNotFoundException
+import servlet.core.annotation.Controller
+import servlet.core.annotation.Inject
 import webserver.application.repository.OUserRepository
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class UserUpdateController : Controller {
-
-    private val userDao = UserDao()
+@Controller
+class UserUpdateController @Inject constructor(private val userDao: UserDao) : LegacyController {
 
     override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val user = getAuthorizedUser(request)

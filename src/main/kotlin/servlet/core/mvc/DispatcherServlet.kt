@@ -1,10 +1,7 @@
 package servlet.core.mvc
 
 import mu.KotlinLogging
-import servlet.core.LegacyRequestMapping
-import java.lang.IllegalArgumentException
 import javax.servlet.ServletException
-import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -16,7 +13,6 @@ class DispatcherServlet(private val handlerMapping: HandlerMapping) : HttpServle
     private val handlerAdapters: MutableList<HandlerAdapter> = mutableListOf()
 
     override fun init() {
-        mappings.add(LegacyRequestMapping())
         mappings.add(handlerMapping)
 
         handlerAdapters.add(ControllerHandlerAdapter())

@@ -5,9 +5,10 @@ import servlet.core.db.ConnectionManager
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import javax.sql.DataSource
 
 @Component
-class JdbcTemplate {
+class JdbcTemplate(private val dataSource: DataSource) {
 
     @Throws(DataAccessException::class)
     fun update(sql: String, vararg values: Any, keyHolder: KeyHolder? = null): Int {

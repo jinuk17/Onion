@@ -2,15 +2,16 @@ package servlet.app.controller
 
 import servlet.app.dao.UserDao
 import servlet.core.NotFoundUrlException
+import servlet.core.annotation.Controller
+import servlet.core.annotation.Inject
 import servlet.core.mvc.*
-import servlet.core.mvc.Controller.Companion.jspView
-import servlet.core.mvc.Controller.Companion.redirectView
+import servlet.core.mvc.LegacyController.Companion.jspView
+import servlet.core.mvc.LegacyController.Companion.redirectView
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class UserListController : Controller {
-
-    private val userDao = UserDao()
+@Controller
+class UserListController @Inject constructor(private val userDao: UserDao) : LegacyController {
 
     override fun get(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
 

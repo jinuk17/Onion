@@ -1,6 +1,6 @@
 package servlet.app.controller
 
-import webserver.application.model.User
+import servlet.app.model.User
 import javax.servlet.http.HttpServletRequest
 
 

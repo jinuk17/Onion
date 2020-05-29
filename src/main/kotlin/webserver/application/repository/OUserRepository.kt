@@ -1,9 +1,9 @@
 package webserver.application.repository
 
-import webserver.application.model.User
-import webserver.application.model.UserId
+import servlet.app.model.User
+import servlet.app.model.UserId
 
-object UserRepository {
+object OUserRepository {
 
     private val map = mutableMapOf(
         "a1" to User("a1", "a1", "기승", "a1@mail.com"),

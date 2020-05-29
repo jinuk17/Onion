@@ -1,3 +1,3 @@
-package webserver.application.model
+package servlet.app.model
 
 class UserNotFoundException: RuntimeException()

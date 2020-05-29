@@ -2,10 +2,13 @@ package servlet.core
 
 import servlet.app.controller.*
 import servlet.core.mvc.Controller
+import servlet.core.mvc.HandlerMapping
+import javax.servlet.http.HttpServletRequest
 
-class RequestMapping {
+class LegacyRequestMapping : HandlerMapping {
 
     private val urlMappings: MutableMap<String, Controller> = mutableMapOf()
+
     init {
         addController("/user/login", LoginController())
         addController("/user/logout", LogoutController())
@@ -15,11 +18,11 @@ class RequestMapping {
         addController("/api/qna/answer", AddAnswerController())
     }
 
-    fun getController(url: String): Controller? {
-        return urlMappings[url]
+    override fun getHandler(request: HttpServletRequest): Controller? {
+        return urlMappings[request.requestURI]
     }
 
-    fun addController(url: String, controller: Controller) {
+    private fun addController(url: String, controller: Controller) {
         urlMappings[url] = controller
     }
 }

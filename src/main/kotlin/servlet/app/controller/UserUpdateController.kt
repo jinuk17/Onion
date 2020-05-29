@@ -6,9 +6,9 @@ import servlet.core.mvc.Controller.Companion.jspView
 import servlet.core.mvc.Controller.Companion.redirectView
 import webserver.application.NotAuthenticationException
 import webserver.application.NotAuthorizedException
-import webserver.application.model.User
-import webserver.application.model.UserNotFoundException
-import webserver.application.repository.UserRepository
+import servlet.app.model.User
+import servlet.app.model.UserNotFoundException
+import webserver.application.repository.OUserRepository
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -36,7 +36,7 @@ class UserUpdateController : Controller {
 
     private fun getAuthorizedUser(req: HttpServletRequest): User {
         val sessionUser = Authentication.getSessionUser(req) ?: throw NotAuthenticationException()
-        val user = req.getParameter("userId")?.let { UserRepository.get(it) } ?: throw UserNotFoundException()
+        val user = req.getParameter("userId")?.let { OUserRepository.get(it) } ?: throw UserNotFoundException()
         if (sessionUser.id != user.id) {
             throw NotAuthorizedException()
         }

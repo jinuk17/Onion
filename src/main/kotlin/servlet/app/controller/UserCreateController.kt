@@ -5,7 +5,7 @@ import servlet.app.dao.UserDao
 import servlet.core.mvc.*
 import servlet.core.mvc.Controller.Companion.jspView
 import servlet.core.mvc.Controller.Companion.redirectView
-import webserver.application.model.User
+import servlet.app.model.User
 import java.sql.SQLException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

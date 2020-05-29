@@ -1,7 +1,7 @@
 package webserver.application.controller
 
-import webserver.application.model.Login
-import webserver.application.repository.UserRepository
+import servlet.app.model.Login
+import webserver.application.repository.OUserRepository
 import webserver.framework.controller.AbstractController
 import webserver.framework.http.HttpRequest
 import webserver.framework.http.HttpResponse
@@ -12,7 +12,7 @@ class LoginController: AbstractController() {
     override fun doPost(request: HttpRequest, response: HttpResponse) {
 
         val login = parseLogin(request)
-        val loginUser = UserRepository.get(login.userId)?.takeIf { it.password == login.password }
+        val loginUser = OUserRepository.get(login.userId)?.takeIf { it.password == login.password }
 
         if(loginUser != null) {
             val session = request.getSession()

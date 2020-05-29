@@ -1,4 +1,4 @@
-package webserver.application.model
+package servlet.app.model
 
 typealias UserId = String
 

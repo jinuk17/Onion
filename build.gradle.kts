@@ -22,8 +22,10 @@ dependencies {
     implementation("com.zaxxer:HikariCP:3.3.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8")
+    implementation("org.reflections:reflections:0.9.12")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
+    testImplementation("org.springframework:spring-test:5.2.5.RELEASE")
 }
 repositories {
     mavenCentral()

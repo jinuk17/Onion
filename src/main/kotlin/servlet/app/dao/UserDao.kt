@@ -1,7 +1,6 @@
 package servlet.app.dao
 
-import webserver.application.model.User
-import java.sql.PreparedStatement
+import servlet.app.model.User
 import java.sql.ResultSet
 import java.sql.SQLException
 

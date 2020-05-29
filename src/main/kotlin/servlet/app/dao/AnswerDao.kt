@@ -1,21 +1,12 @@
 package servlet.app.dao
 
-import webserver.application.model.Answer
-import webserver.application.model.CreateAnswer
-import webserver.application.model.User
-import java.sql.Date
+import servlet.app.dao.DateExtensions.toLocalDateTime
+import servlet.app.model.Answer
+import servlet.app.model.CreateAnswer
 import java.sql.ResultSet
 import java.sql.SQLException
-import java.sql.Timestamp
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-
-private fun Date.toLocalDateTime(zone: ZoneId): LocalDateTime {
-    return Instant.ofEpochMilli(this.time)
-        .atZone(zone)
-        .toLocalDateTime()
-}
 
 class AnswerDao {
 
@@ -36,9 +27,26 @@ class AnswerDao {
     }
 
     @Throws(SQLException::class)
-    fun findById(id: Long): Answer?{
+    fun findById(id: Long): Answer? {
         return jdbcTemplate.queryForObject(
-            "SELECT answerId, writer, contents, createdDate, questionId FROM answers WHERE answerId = ?", id) { answer(it) }
+            "SELECT answerId, writer, contents, createdDate, questionId FROM answers WHERE answerId = ?", id
+        ) { answer(it) }
+    }
+
+    fun findAllByQuestionId(questionId: Long): List<Answer> {
+        val sql = ("SELECT answerId, questionId, writer, contents, createdDate FROM ANSWERS " +
+                "WHERE questionId = ? " +
+                "order by answerId desc")
+
+        return jdbcTemplate.query(sql, questionId) {
+            Answer(
+                it.getLong("answerId"),
+                it.getString("writer"),
+                it.getString("contents"),
+                it.getTimestamp("createdDate").toLocalDateTime(),
+                it.getLong("questionId")
+            )
+        }
     }
 
     private fun answer(rs: ResultSet): Answer {

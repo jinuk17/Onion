@@ -1,7 +1,7 @@
 package webserver.application.controller
 
-import webserver.application.model.User
-import webserver.application.repository.UserRepository
+import servlet.app.model.User
+import webserver.application.repository.OUserRepository
 import webserver.framework.controller.AbstractController
 import webserver.framework.http.HttpRequest
 import webserver.framework.http.HttpResponse
@@ -30,7 +30,7 @@ class UserCreateController: AbstractController() {
                 }
             } ?: throw IllegalArgumentException("Invalid User Info : ${request.getParameter()}")
 
-        return UserRepository.save(user)
+        return OUserRepository.save(user)
     }
 
 }

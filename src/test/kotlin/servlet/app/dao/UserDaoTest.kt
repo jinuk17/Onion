@@ -7,7 +7,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
 import servlet.core.db.ConnectionManager
-import webserver.application.model.User
+import servlet.app.model.User
 
 
 class UserDaoTest {

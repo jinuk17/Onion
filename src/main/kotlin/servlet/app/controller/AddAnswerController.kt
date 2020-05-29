@@ -4,12 +4,9 @@ import mu.KotlinLogging
 import servlet.app.dao.AnswerDao
 import servlet.core.mvc.Controller
 import servlet.core.NotFoundUrlException
-import servlet.core.OnionObjectMapper
 import servlet.core.mvc.Controller.Companion.jsonView
-import servlet.core.mvc.JsonView
 import servlet.core.mvc.ModelAndView
-import servlet.core.mvc.View
-import webserver.application.model.CreateAnswer
+import servlet.app.model.CreateAnswer
 import java.lang.IllegalStateException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

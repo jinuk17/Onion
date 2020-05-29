@@ -1,14 +1,14 @@
 package webserver.application.service
 
-import webserver.application.model.Login
-import webserver.application.model.User
-import webserver.application.repository.UserRepository
+import servlet.app.model.Login
+import servlet.app.model.User
+import webserver.application.repository.OUserRepository
 
 
 class UserService {
 
     fun login(login: Login): User? {
-        return UserRepository.get(login.userId)?.takeIf { it.password == login.password }
+        return OUserRepository.get(login.userId)?.takeIf { it.password == login.password }
     }
 
 }

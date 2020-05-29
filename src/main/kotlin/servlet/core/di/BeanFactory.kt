@@ -12,10 +12,18 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
     private val logger = KotlinLogging.logger {}
 
     private val beans: MutableMap<Class<*>, Any> = mutableMapOf()
+    private val injectors: List<Injector>
 
     init {
-        val constructorInjector = ConstructorInjector(this)
-        preInstantiateBeans.forEach { constructorInjector.inject(it) }
+        injectors = listOf(
+            FieldInjector(this),
+            SetterInjector(this),
+            ConstructorInjector(this)
+        )
+
+        preInstantiateBeans.forEach {
+            logger.debug { "instantiated Class : $it" }
+            inject(it) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -37,5 +45,9 @@ class BeanFactory(private val preInstantiateBeans: Set<Class<*>>) {
     fun isPreInstantiateBean(clazz: Class<*>): Boolean {
         val concreteClass = BeanFactoryUtils.findConcreteClass(clazz, preInstantiateBeans)
         return preInstantiateBeans.contains(concreteClass)
+    }
+
+    private fun inject(clazz: Class<*>) {
+        injectors.forEach { it.inject(clazz) }
     }
 }

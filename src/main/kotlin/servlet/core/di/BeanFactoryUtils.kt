@@ -4,6 +4,7 @@ import org.reflections.ReflectionUtils
 import servlet.core.annotation.Inject
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 
 object BeanFactoryUtils {
@@ -26,10 +27,18 @@ object BeanFactoryUtils {
                 return clazz
             }
         }
-        throw IllegalStateException(injectedClazz.toString() + "인터페이스를 구현하는 Bean이 존재하지 않는다.")
+        throw IllegalStateException("Not fount concreteClass of $injectedClazz")
     }
 
     fun getInjectedFields(clazz: Class<*>): Set<Field>  {
         return ReflectionUtils.getAllFields(clazz, ReflectionUtils.withAnnotation(Inject::class.java))
+    }
+
+    fun getInjectedMethods(clazz: Class<*>): Set<Method> {
+        return ReflectionUtils.getAllMethods(
+            clazz,
+            ReflectionUtils.withAnnotation(Inject::class.java),
+            ReflectionUtils.withReturnType(Unit::class.java)
+        ).orEmpty().toSet()
     }
 }
